@@ -11,20 +11,26 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- ฟังก์ชันแปลงรูป ---
+# --- ฟังก์ชันแปลงรูป (Smart Path: หาเองว่ารูปอยู่ไหน) ---
 def get_img_as_base64(file_path):
-    try:
-        if os.path.exists(file_path):
-            with open(file_path, "rb") as f:
-                data = f.read()
-            return base64.b64encode(data).decode()
-    except: return ""
+    # ลองหาในโฟลเดอร์ปัจจุบันก่อน (Root)
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    
+    # ถ้าไม่เจอ ลองหาในโฟลเดอร์ images/ (เผื่อไว้)
+    elif os.path.exists(f"images/{file_path}"):
+        with open(f"images/{file_path}", "rb") as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+        
     return ""
 
-# ====== 🎨 SUPER PREMIUM CSS (WIDE EDITION) ======
+# ====== 🎨 SUPER PREMIUM CSS ======
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Prompt:wght@300;400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Prompt:wght@300;500;700&display=swap');
 
     :root {
         --primary: #32E0C4;
@@ -40,15 +46,6 @@ st.markdown("""
     }
     
     #MainMenu, header, footer {visibility: hidden;}
-
-    /* --- 🚀 FORCE WIDE DIALOG (ส่วนสำคัญที่ทำให้กว้าง) --- */
-    div[data-testid="stDialog"] div[role="dialog"] {
-        width: 80vw !important; /* กว้าง 80% ของหน้าจอ */
-        max-width: 1400px !important; /* ลิมิตไม่ให้เกินจอใหญ่ */
-        background: rgba(15, 20, 25, 0.95) !important;
-        border: 1px solid #32E0C4 !important;
-        border-radius: 20px !important;
-    }
 
     /* HERO SECTION */
     .hero-container {
@@ -131,7 +128,7 @@ st.markdown("""
     /* --- PROFILE STYLES --- */
     .profile-header {
         font-family: 'Montserrat', sans-serif;
-        font-size: 3.5rem; /* ชื่อใหญ่ขึ้น */
+        font-size: 3.5rem; 
         font-weight: 800;
         color: #32E0C4;
         margin-bottom: 5px;
@@ -147,7 +144,6 @@ st.markdown("""
         padding-bottom: 15px;
     }
     
-    /* Stat Grid (แนวนอน) */
     .stat-row {
         display: flex;
         justify-content: space-between;
@@ -161,18 +157,16 @@ st.markdown("""
     .stat-label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 2px; }
     .stat-val { font-size: 1.2rem; font-weight: 700; color: #fff; }
 
-    /* Fact Box */
     .fact-box {
         background: linear-gradient(90deg, rgba(50, 224, 196, 0.05) 0%, transparent 100%);
         border-left: 5px solid #32E0C4;
         padding: 15px 20px;
         border-radius: 8px;
         margin-bottom: 12px;
-        font-size: 1.1rem; /* ตัวหนังสือใหญ่อ่านง่าย */
+        font-size: 1.1rem;
         line-height: 1.6;
     }
 
-    /* Song Cards */
     .song-link { text-decoration: none; }
     .song-card {
         display: flex; align-items: center; justify-content: space-between;
@@ -190,93 +184,67 @@ st.markdown("""
     }
     .song-title { color: white; font-weight: 600; font-size: 1.1rem; }
 
-    /* Buttons */
-    .stButton button {
-        border-radius: 12px !important;
-        height: 50px;
-        font-weight: bold !important;
+    /* WIDE DIALOG */
+    div[data-testid="stDialog"] div[role="dialog"] {
+        width: 80vw !important;
+        max-width: 1400px !important;
+        background: rgba(15, 20, 25, 0.95) !important;
+        border: 1px solid #32E0C4 !important;
+        border-radius: 20px !important;
     }
+    
+    .stButton button { border-radius: 12px !important; height: 50px; font-weight: bold !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ====== DATA (EXPANDED) ======
+# ====== DATA (FIXED IMAGE PATHS & DOYOUNG SONG) ======
 members = [
     # แถวบน
     {
         "name": "Jeongwoo", "name_thai": "พัค จองอู", "position": "Main Vocalist", 
-        "img": "images/jeongwoo.jpg", "birthday": "28 Sep 2004", "height": "181 cm", "mbti": "ISFP", 
+        "img": "jeongwoo.jpg", "birthday": "28 Sep 2004", "height": "181 cm", "mbti": "ISFP", 
         "name_korean": "박정우", "nickname": "Vocal King",
-        "facts": [
-            "🐺 **Vocal Genius:** ฉายา 'Vocal King' แห่งอิกซาน มีเนื้อเสียงที่ทรงพลังและเข้าถึงอารมณ์เพลงได้ดีที่สุดในเจน 4",
-            "🏫 **Education:** จบจาก SOPA (School of Performing Arts Seoul) เอกดนตรีปฏิบัติ",
-            "🤣 **Mood Maker:** เป็นคนตลกธรรมชาติ มีรีแอคชั่นที่เป็นมีมได้ตลอดเวลา",
-            "✨ **Dedication:** ไม่เคยขาดซ้อมเลยแม้แต่วันเดียวตั้งแต่วันแรกที่เป็นเด็กฝึก"
-        ],
+        "facts": ["🐺 **Vocal Genius:** ฉายา 'Vocal King' แห่งอิกซาน", "🏫 **Education:** จบจาก SOPA", "🤣 **Mood Maker:** เป็นคนตลกธรรมชาติ", "✨ **Dedication:** ไม่เคยขาดซ้อมเลยแม้แต่วันเดียว"],
         "songs": ["LAST NIGHT", "PARADISE", "HOLD IT IN"], 
         "covers": ["Superstar (Ruben Studdard)", "Weight in Gold"]
     },
     {
         "name": "Haruto", "name_thai": "วาตานาเบะ ฮารุโตะ", "position": "Main Rapper", 
-        "img": "images/haruto.jpg", "birthday": "5 Apr 2004", "height": "185 cm", "mbti": "INFP", 
+        "img": "haruto.jpg", "birthday": "5 Apr 2004", "height": "185 cm", "mbti": "INFP", 
         "name_korean": "하루토", "nickname": "Face Genius",
-        "facts": [
-            "🦋 **Visual & Voice:** โดดเด่นด้วยใบหน้าฟ้าประทาน (Face Genius) ตัดกับเสียงแร็ปทุ้มต่ำ (Low Tone) ที่เป็นเอกลักษณ์",
-            "📏 **Tallest:** สมาชิกที่สูงที่สุดในวง (185 cm) และขายาวมาก",
-            "🏠 **Origin:** มาจากฟุกุโอกะ ญี่ปุ่น ครอบครัวเป็นแฟนคลับตัวยงของ BIGBANG",
-            "📝 **Songwriter:** มีชื่อเครดิตในการแต่งเนื้อเพลงแร็ปเกือบทุกเพลงของวง"
-        ],
+        "facts": ["🦋 **Visual & Voice:** Face Genius + Low Tone Rap", "📏 **Tallest:** สูงที่สุดในวง (185 cm)", "🏠 **Origin:** ฟุกุโอกะ ญี่ปุ่น", "📝 **Songwriter:** แต่งแร็ปเกือบทุกเพลง"],
         "songs": ["KING KONG", "VolKno (Unit)", "G.O.A.T"], 
-        "covers": ["FLASH (Solo Song)", "Dat $tick (Rich Brian)"]
+        "covers": ["FLASH (Solo Song)", "Dat $tick"]
     },
     {
         "name": "Jihoon", "name_thai": "พัค จีฮุน", "position": "Main Dancer, Lead Vocalist", 
-        "img": "images/jihoon.jpg", "birthday": "14 Mar 2000", "height": "178 cm", "mbti": "ENTJ", 
+        "img": "jihoon.jpg", "birthday": "14 Mar 2000", "height": "178 cm", "mbti": "ENTJ", 
         "name_korean": "박지훈", "nickname": "Hoonie",
-        "facts": [
-            "🐯 **Leadership:** อดีต Leader ที่เข้มแข็ง คอยดูแลระเบียบวินัยและเป็นที่พึ่งของน้องๆ",
-            "🎤 **MC Skills:** มีทักษะการพูดและการดำเนินรายการยอดเยี่ยม (อดีต MC Inkigayo)",
-            "💃 **Power Dancer:** ไลน์เต้นแข็งแรงและล็อคท่าเป๊ะมาก เป็นเสาหลักด้านการเต้น",
-            "💪 **Strength:** แข็งแรงมากและชอบออกกำลังกาย กล้ามเนื้อขาแน่นปึ้ก"
-        ],
+        "facts": ["🐯 **Leadership:** อดีต Leader ที่เข้มแข็ง", "🎤 **MC Skills:** พูดเก่ง ดำเนินรายการดีเยี่ยม", "💃 **Power Dancer:** ไลน์เต้นแข็งแรง", "💪 **Strength:** แข็งแรงมาก"],
         "songs": ["KING KONG", "LAST NIGHT", "THE WAY TO"], 
-        "covers": ["Song Goes Off", "Ko Ko Bop (EXO)"]
+        "covers": ["Song Goes Off", "Ko Ko Bop"]
     },
     {
         "name": "Yoshi", "name_thai": "โยชิโนริ", "position": "Main Rapper", 
-        "img": "images/yoshi.jpg", "birthday": "15 May 2000", "height": "179 cm", "mbti": "INFP", 
+        "img": "yoshi.jpg", "birthday": "15 May 2000", "height": "179 cm", "mbti": "INFP", 
         "name_korean": "요시", "nickname": "Dark Horse",
-        "facts": [
-            "🐯 **High Tone Rap:** แร็ปเปอร์เสียงสูงที่มีสไตล์ดุดันแต่แฝงความเท่",
-            "🎨 **Artistic:** รักศิลปะมาก ชอบวาดรูปและแต่งตัวเก่ง (Fashionista)",
-            "🇰🇷 **Heritage:** เกิดที่ญี่ปุ่นแต่เป็นลูกครึ่งเกาหลี (รุ่นที่ 4) ชื่อเกาหลีคือ 'คิม บังจอน'",
-            "🎵 **Producer:** มีเพลงที่แต่งเองและโปรดิวซ์เองอย่าง 'STUPID'"
-        ],
+        "facts": ["🐯 **High Tone Rap:** แร็ปเสียงสูงดุดัน", "🎨 **Artistic:** รักศิลปะและแฟชั่น", "🇰🇷 **Heritage:** ลูกครึ่งเกาหลี (รุ่นที่ 4)", "🎵 **Producer:** แต่งเพลง 'STUPID'"],
         "songs": ["STUPID (Composed)", "KING KONG", "VolKno"], 
         "covers": ["Fancy (Drake)", "Be Like Me"]
     },
     {
         "name": "Junghwan", "name_thai": "โซ จองฮวาน", "position": "Maknae, Lead Dancer", 
-        "img": "images/junghwan.jpg", "birthday": "18 Feb 2005", "height": "180.3 cm", "mbti": "ENFP-T", 
+        "img": "junghwan.jpg", "birthday": "18 Feb 2005", "height": "180.3 cm", "mbti": "ENFP-T", 
         "name_korean": "소정환", "nickname": "Super King Cow Baby",
-        "facts": [
-            "🐮 **King Cow Baby:** น้องเล็กที่ตัวโตและแข็งแรงที่สุดคนหนึ่งของวง",
-            "🥋 **Athlete:** อดีตนักกีฬาเทควันโดสายดำ (ทีม K-Tigers)",
-            "🕺 **Natural Dancer:** มีไลน์เต้นที่ทรงพลังและยืดหยุ่น เรียนรู้ท่าเต้นไวมาก",
-            "🍩 **Foodie:** รักการกินเป็นชีวิตจิตใจ โดยเฉพาะโดนัท"
-        ],
+        "facts": ["🐮 **King Cow Baby:** น้องเล็กตัวโต", "🥋 **Athlete:** อดีตนักกีฬาเทควันโด K-Tigers", "🕺 **Natural Dancer:** เต้นเก่ง เรียนรู้ไว", "🍩 **Foodie:** รักการกินเป็นชีวิตจิตใจ"],
         "songs": ["KING KONG", "CLAP! (Unit)", "B.O.M.B"], 
         "covers": ["Supermarket Flowers", "Lie (Jimin)"]
     },
     {
         "name": "Junkyu", "name_thai": "คิม จุนกยู", "position": "Leader (2025), Main Vocal", 
-        "img": "images/junkyu.jpg", "birthday": "9 Sep 2000", "height": "178 cm", "mbti": "INFJ", 
+        "img": "junkyu.jpg", "birthday": "9 Sep 2000", "height": "178 cm", "mbti": "INFJ", 
         "name_korean": "김준규", "nickname": "Handsome Koala",
-        "facts": [
-            "🐨 **Unique Voice:** เจ้าของเสียงร้องที่เป็นเอกลักษณ์ที่สุด (YG Style Voice)",
-            "👑 **New Leader:** รับตำแหน่ง Leader คนใหม่ในปี 2025 (คู่กับอาซาฮิ)",
-            "🎵 **Hit Maker:** แต่งเพลงเก่งมาก เช่น 'MOVE', 'BETTER', 'I WANT YOUR LOVE'",
-            "🤣 **Meme King:** เป็นคนตลกธรรมชาติ มีสีหน้าที่เป็นมีมได้ตลอดเวลา"
-        ],
+        "facts": ["🐨 **Unique Voice:** เสียงเอกลักษณ์ (YG Style)", "👑 **New Leader:** ผู้นำวงคนใหม่ (2025)", "🎵 **Hit Maker:** แต่งเพลงเก่ง (MOVE, BETTER)", "🤣 **Meme King:** ตลกธรรมชาติ"],
         "songs": ["LAST NIGHT", "MOVE (T5)", "BETTER"], 
         "covers": ["Latch", "Beautiful"]
     },
@@ -284,53 +252,39 @@ members = [
     # แถวล่าง
     {
         "name": "Doyoung", "name_thai": "คิม โดยอง", "position": "Main Dancer, Vocalist", 
-        "img": "images/doyoung.jpg", "birthday": "4 Dec 2003", "height": "177 cm", "mbti": "ESTP", 
+        "img": "doyoung.jpg", "birthday": "4 Dec 2003", "height": "177 cm", "mbti": "ESTP", 
         "name_korean": "김도영", "nickname": "Dobby",
         "facts": [
-            "🛹 **Skater Boy:** เจ้าชายสเก็ตบอร์ดที่มีความเท่และน่ารัก",
-            "🕺 **Clean Dance:** ได้รับการยกย่องว่ามีไลน์เต้นที่ 'คม' และ 'สะอาด' ที่สุดในวง",
-            "🍳 **Chef:** ทำอาหารและอบขนมเก่งมาก มักจะทำให้เมมเบอร์ทานเสมอ",
-            "🧣 **Style:** ชอบแต่งตัวสไตล์สตรีทและมีเซนส์ด้านแฟชั่น"
+            "🛹 **Skater Boy:** เจ้าชายสเก็ตบอร์ดสุดเท่",
+            "🕺 **Clean Dance:** ไลน์เต้น 'คม' และ 'สะอาด' ที่สุด",
+            "🍳 **Chef:** ทำอาหารและอบขนมเก่งมาก",
+            "🧣 **Style:** แฟชั่นนิสต้าสายสตรีท"
         ],
         "songs": ["KING KONG", "WONDERLAND", "B.L.T"], 
-        "covers": ["Lady (Modjo)", "Freedom (iKON)"]
+        # แก้ไขตามคำขอ: ใช้ Babushka Boi แทน Lady
+        "covers": ["Babushka Boi (Dance Perf.)", "Freedom (iKON)"]
     },
     {
         "name": "Jaehyuk", "name_thai": "ยุน แจฮยอก", "position": "Vocalist", 
-        "img": "images/jaehyuk.jpg", "birthday": "23 Jul 2001", "height": "178 cm", "mbti": "INFP", 
+        "img": "jaehyuk.jpg", "birthday": "23 Jul 2001", "height": "178 cm", "mbti": "INFP", 
         "name_korean": "윤재혁", "nickname": "Chow Chow",
-        "facts": [
-            "🦁 **Casting Legend:** ถูกทาบทามจากค่ายเพลงใหญ่ๆ ครบทุกค่ายเพราะหน้าตาดี",
-            "🥰 **Sweetheart:** เป็นคนที่อบอุ่น ใส่ใจคนรอบข้าง และชอบบอกรักเมมเบอร์",
-            "🤚 **Lefty:** ถนัดมือซ้าย ซึ่งหายากในไอดอล",
-            "✨ **Growth:** พัฒนาการก้าวกระโดดที่สุด จากไม่มีพื้นฐานเต้นจนเก่งรอบด้าน"
-        ],
+        "facts": ["🦁 **Casting Legend:** ถูกจีบทุกค่ายเพราะหน้าตาดี", "🥰 **Sweetheart:** อบอุ่น ใส่ใจคนรอบข้าง", "🤚 **Lefty:** ถนัดมือซ้าย", "✨ **Growth:** พัฒนาการก้าวกระโดด"],
         "songs": ["LAST NIGHT", "MOVE (T5)", "Wonderland"], 
         "covers": ["Ring Ring", "My Type"]
     },
     {
         "name": "Hyunsuk", "name_thai": "ชเว ฮยอนซอก", "position": "Main Rapper, Main Dancer", 
-        "img": "images/hyunsuk.jpg", "birthday": "21 Apr 1999", "height": "171 cm", "mbti": "ENFP", 
+        "img": "hyunsuk.jpg", "birthday": "21 Apr 1999", "height": "171 cm", "mbti": "ENFP", 
         "name_korean": "최현석", "nickname": "Hedgehog",
-        "facts": [
-            "🦔 **The Pillar:** พี่ใหญ่และอดีต Leader ผู้เป็นเสาหลักของวง",
-            "👗 **Fashionista:** คลั่งไคล้แฟชั่นมาก แต่งตัวจัดจ้านที่สุดในวง",
-            "⚽ **Football Fan:** แฟนบอลตัวยง (Real Madrid)",
-            "🎧 **Producer:** อยู่เบื้องหลังเพลงฮิตมากมายของ TREASURE"
-        ],
+        "facts": ["🦔 **The Pillar:** พี่ใหญ่และอดีต Leader", "👗 **Fashionista:** แต่งตัวจัดจ้านที่สุด", "⚽ **Football Fan:** แฟนบอลตัวยง", "🎧 **Producer:** โปรดิวเซอร์หลักของวง"],
         "songs": ["KING KONG", "G.O.A.T", "VolKno"], 
         "covers": ["Humble", "Oll' Ready"]
     },
     {
         "name": "Asahi", "name_thai": "ฮามาดะ อาซาฮิ", "position": "Leader (2025), Visual", 
-        "img": "images/asahi.jpg", "birthday": "20 Aug 2001", "height": "172 cm", "mbti": "INFP", 
+        "img": "asahi.jpg", "birthday": "20 Aug 2001", "height": "172 cm", "mbti": "INFP", 
         "name_korean": "아사히", "nickname": "Robot Sahi",
-        "facts": [
-            "🤖 **Robot Sahi:** ฉายาหุ่นยนต์เพราะหน้านิ่งมาก แต่จริงๆ ตลกหน้าตาย",
-            "👑 **New Leader:** ผู้นำวงคนใหม่ (2025) ที่มีวิสัยทัศน์ทางศิลปะ",
-            "🎨 **Artist:** วาดรูปสวย ถ่ายรูปเก่ง และมีสไตล์ที่เป็นเอกลักษณ์",
-            "🎹 **Composer:** เจ้าพ่อเพลง Ballad ของวง (แต่งเพลง Orange, CLAP!)"
-        ],
+        "facts": ["🤖 **Robot Sahi:** ตลกหน้าตาย", "👑 **New Leader:** ผู้นำสายอาร์ต (2025)", "🎨 **Artist:** วาดรูปสวย ถ่ายรูปเก่ง", "🎹 **Composer:** เจ้าพ่อเพลง Ballad"],
         "songs": ["LAST NIGHT", "THANK YOU", "ORANGE"], 
         "covers": ["Lay Me Down", "Yamai"]
     }
@@ -340,7 +294,7 @@ members = [
 st.markdown("""
 <div class="hero-container">
     <h1 class="hero-title">TREASURE</h1>
-    <p class="hero-subtitle">3rd Mini Album: [LOVE PULSE]</p>
+    <p class="hero-subtitle">REBOOT : THE NEW ERA 2025</p>
     <a href="https://www.youtube.com/@TREASURE" target="_blank" class="yt-button">
         📺 Official YouTube
     </a>
@@ -356,12 +310,12 @@ if "id" in st.query_params:
             st.query_params.clear() 
     except: pass
 
-# ====== IMAGE MAP ======
-group_img_path = "images/group.jpg"
+# ====== IMAGE MAP (GLASS) ======
+group_img_path = "group.jpg" # ใช้ Path แบบ Root เพื่อรองรับ GitHub
 
-if os.path.exists(group_img_path):
-    img_b64 = get_img_as_base64(group_img_path)
-    
+img_b64 = get_img_as_base64(group_img_path)
+
+if img_b64:
     st.markdown(f"""
     <div class="map-frame">
         <img src="data:image/jpeg;base64,{img_b64}" class="main-image">
@@ -379,7 +333,7 @@ if os.path.exists(group_img_path):
     <p style="text-align:center;color:#666;font-size:0.8rem;margin-top:-10px;letter-spacing:1px;">TOUCH MEMBER TO VIEW PROFILE</p>
     """, unsafe_allow_html=True)
 else:
-    st.error("❌ ไม่พบไฟล์รูป images/group.jpg")
+    st.error("❌ ไม่พบไฟล์รูป group.jpg ในโฟลเดอร์ Root")
 
 # ====== POPUP MODAL (BIG & WIDE) ======
 if "selected_member" in st.session_state:
@@ -387,14 +341,15 @@ if "selected_member" in st.session_state:
     
     @st.dialog(f"💎 {sel['name']}")
     def show_modal():
-        # Layout: 40% รูปภาพ | 60% ข้อมูล
         c1, c2 = st.columns([1.5, 2.5])
         
         with c1:
-            if os.path.exists(sel['img']):
-                st.image(sel['img'], use_container_width=True)
+            img_code = get_img_as_base64(sel['img'])
+            if img_code:
+                st.markdown(f'<img src="data:image/jpeg;base64,{img_code}" style="width:100%; border-radius:15px;">', unsafe_allow_html=True)
+            else:
+                st.info("No Image")
             
-            # Stat Grid (ใต้รูป)
             st.markdown(f"""
             <div class="stat-row">
                 <div class="stat-item"><span class="stat-label">BIRTH</span><span class="stat-val">{sel['birthday'][0:6]}</span></div>
@@ -445,7 +400,9 @@ for i in range(5):
         if st.button(f"{m['name']}", key=f"g1_{i}", use_container_width=True):
             st.session_state.selected_member = m
             st.rerun()
-        if os.path.exists(m['img']): st.image(m['img'], use_container_width=True)
+        img_code = get_img_as_base64(m['img'])
+        if img_code:
+            st.markdown(f'<img src="data:image/jpeg;base64,{img_code}" style="width:100%; border-radius:10px;">', unsafe_allow_html=True)
 
 st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 cols2 = st.columns(5)
@@ -456,12 +413,13 @@ for i in range(5):
         if st.button(f"{m['name']}", key=f"g2_{idx}", use_container_width=True):
             st.session_state.selected_member = m
             st.rerun()
-        if os.path.exists(m['img']): st.image(m['img'], use_container_width=True)
+        img_code = get_img_as_base64(m['img'])
+        if img_code:
+            st.markdown(f'<img src="data:image/jpeg;base64,{img_code}" style="width:100%; border-radius:10px;">', unsafe_allow_html=True)
 
 # ====== FOOTER ======
 st.markdown("""
 <div style="text-align:center; margin-top:50px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); opacity:0.5; font-size:0.8rem;">
-    TREASURE MAKER PROJECT 2025 | DESIGNED WITH STREAMLIT<br>
-    Data Source: Kprofiles & Official YouTube
+    TREASURE MAKER PROJECT 2025 | DESIGNED WITH STREAMLIT
 </div>
 """, unsafe_allow_html=True)
