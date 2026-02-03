@@ -294,7 +294,7 @@ members = [
 st.markdown("""
 <div class="hero-container">
     <h1 class="hero-title">TREASURE</h1>
-    <p class="hero-subtitle">REBOOT : THE NEW ERA 2025</p>
+    <p class="hero-subtitle">3rd Mini Album: [LOVE PULSE]</p>
     <a href="https://www.youtube.com/@TREASURE" target="_blank" class="yt-button">
         📺 Official YouTube
     </a>
@@ -422,4 +422,5 @@ st.markdown("""
 <div style="text-align:center; margin-top:50px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); opacity:0.5; font-size:0.8rem;">
     TREASURE MAKER PROJECT 2025 | DESIGNED WITH STREAMLIT
 </div>
+
 """, unsafe_allow_html=True)
