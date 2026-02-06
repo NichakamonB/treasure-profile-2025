@@ -505,12 +505,12 @@ def render_sidebar(members: List[Dict], t: Dict, lang: str):
             <div class="rec-card" style="padding:0; overflow:hidden; position:relative;">
                 <img src="{cover_img_1}" style="width:100%; display:block; opacity:0.9; transition:0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9">
                 <div style="position:absolute; bottom:0; left:0; width:100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color:#32E0C4; padding:10px; font-weight:bold; font-size:0.9rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
-                    ▶ WATCH M/V
+                    ▶ WATCH DANCE PRACTICE VIDEO
                 </div>
             </div>
         </a>
         <div style="text-align:center; font-size:0.8rem; color:#888; margin-top:5px;">
-            TREASURE - M/V 💎
+            TREASURE - DANCE PRACTICE VIDEO 💎
         </div>
         """, unsafe_allow_html=True)
         
@@ -679,4 +679,5 @@ def show_member_modal(sel: Dict, t: Dict, lang: str):
     modal_content()
 
 if __name__ == "__main__":
+
     main()
