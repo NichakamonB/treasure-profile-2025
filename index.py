@@ -3,55 +3,104 @@ import base64
 import os
 import urllib.parse
 import random
-from typing import Dict, List, Optional
-import warnings
+import json
+from typing import Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+from pathlib import Path
 
 # ============================================
 # 📱 PAGE CONFIGURATION
 # ============================================
 st.set_page_config(
-    page_title="TREASURE WORLD 2026", 
-    layout="wide", 
+    page_title="TREASURE WORLD 2026",
+    layout="wide",
     page_icon="💎",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://www.youtube.com/@TREASURE',
+        'Report a bug': None,
+        'About': "💎 TREASURE Official Fan Application 2026 - Created with ❤️ by TEUME"
+    }
 )
+
+# ============================================
+# 🔧 CONFIGURATION
+# ============================================
+class AppConfig:
+    DEFAULT_LANGUAGE = "th"
+    SUPPORTED_LANGUAGES = ["th", "en", "kr", "jp", "cn"]
+    COLS_PER_ROW = 5
+    PREFERENCES_FILE = "user_preferences.json"
+
+# ============================================
+# 💾 USER PREFERENCES MANAGER
+# ============================================
+class UserPreferences:
+    def __init__(self, pref_file: str = AppConfig.PREFERENCES_FILE):
+        self.pref_file = Path(pref_file)
+    
+    def load_all(self) -> dict:
+        try:
+            if self.pref_file.exists():
+                with open(self.pref_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except Exception:
+            pass
+        return {}
+    
+    def save_all(self, data: dict) -> bool:
+        try:
+            with open(self.pref_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return True
+        except Exception:
+            return False
+    
+    def load_favorites(self) -> List[str]:
+        data = self.load_all()
+        return data.get('favorites', [])
+    
+    def save_favorites(self, favorites: List[str]) -> bool:
+        data = self.load_all()
+        data['favorites'] = favorites
+        return self.save_all(data)
+    
+    def load_theme(self) -> str:
+        data = self.load_all()
+        return data.get('theme', 'dark')
+    
+    def save_theme(self, theme: str) -> bool:
+        data = self.load_all()
+        data['theme'] = theme
+        return self.save_all(data)
 
 # ============================================
 # 🖼️ IMAGE UTILITIES
 # ============================================
-@st.cache_data
+@st.cache_data(ttl=3600)
 def get_img_as_base64(file_path: str) -> str:
-    """Load and encode image to base64 from a file path"""
-    paths_to_check = [
-        file_path,
-        os.path.join("images", file_path),
-        os.path.join(os.path.dirname(__file__), file_path),
-        os.path.join(os.path.dirname(__file__), "images", file_path)
-    ]
-    
-    for path in paths_to_check:
+    primary_paths = [os.path.join("images", file_path), os.path.join(os.path.dirname(__file__), "images", file_path)]
+    for path in primary_paths:
         if os.path.exists(path):
             try:
                 with open(path, "rb") as f:
                     return base64.b64encode(f.read()).decode()
-            except Exception as e:
-                warnings.warn(f"Error reading {path}: {e}")
+            except Exception:
                 continue
     return ""
 
 def get_image_src(image_source: str, name_for_avatar: str = "Member") -> str:
-    # 1. Try Local File
-    b64 = get_img_as_base64(image_source)
-    if b64:
-        return f"data:image/jpeg;base64,{b64}"
-    
-    # 2. Try URL
-    if image_source.startswith("http"):
-        return image_source
-        
-    # 3. Fallback
-    safe_name = urllib.parse.quote(name_for_avatar)
-    return f"https://ui-avatars.com/api/?name={safe_name}&background=32E0C4&color=fff&size=400&font-size=0.33"
+    try:
+        if image_source and not image_source.startswith("http"):
+            b64 = get_img_as_base64(image_source)
+            if b64: return f"data:image/jpeg;base64,{b64}"
+        if image_source and image_source.startswith("http"):
+            return image_source
+        safe_name = urllib.parse.quote(name_for_avatar)
+        return f"https://ui-avatars.com/api/?name={safe_name}&background=32E0C4&color=fff&size=400&font-size=0.33"
+    except Exception:
+        safe_name = urllib.parse.quote(name_for_avatar)
+        return f"https://ui-avatars.com/api/?name={safe_name}&background=32E0C4&color=fff&size=400&font-size=0.33"
 
 # ============================================
 # 🌍 LANGUAGE SYSTEM
@@ -66,6 +115,7 @@ def get_ui_text() -> Dict:
             "tab1": "ประวัติ & สตอรี่",
             "tab2": "เพลงฮิต",
             "tab3": "คัฟเวอร์",
+            "tab4": "สถิติ",
             "birth": "วันเกิด",
             "height": "ส่วนสูง",
             "select": "เลือกดูรายชื่อสมาชิก",
@@ -76,7 +126,33 @@ def get_ui_text() -> Dict:
             "rec_title": "✨ แนะนำสำหรับคุณ",
             "rec_playlist_1": "🎬 OFFICIAL M/V",
             "rec_playlist_2": "💎 TREASURE MAP",
-            "error_member": "ไม่พบข้อมูลสมาชิก"
+            "error_member": "ไม่พบข้อมูลสมาชิก",
+            "stats": "สถิติทั้งหมด",
+            "total_members": "สมาชิก",
+            "your_favorites": "รายการโปรดของคุณ",
+            "total_songs": "เพลงทั้งหมด",
+            "random_member": "🎲 สุ่มสมาชิก",
+            "theme": "เปลี่ยนธีม",
+            "light": "☀️ สว่าง",
+            "dark": "🌙 มืด",
+            "birthday_countdown": "🎂 นับถอยหลังวันเกิด",
+            "days": "วัน",
+            "add_favorite": "💖 เพิ่มเป็นสมาชิกโปรด",
+            "remove_favorite": "❤️ ลบออกจากรายการโปรด",
+            "added_favorite": "เพิ่มเป็นสมาชิกโปรดแล้ว! ❤️",
+            "removed_favorite": "ลบออกจากรายการโปรดแล้ว",
+            "loading": "กำลังโหลด...",
+            "tab_group": "เกี่ยวกับวง",
+            "debut_date": "วันที่เดบิวต์",
+            "fandom": "ชื่อแฟนคลับ",
+            "origin": "จุดกำเนิด",
+            "shows": "รายการวาไรตี้",
+            "albums": "ผลงานเด่น",
+            "group_desc": "TREASURE เป็นบอยแบนด์จากค่าย YG Entertainment ที่ก่อตั้งผ่านรายการเซอร์ไววัล 'YG Treasure Box' โดดเด่นด้วยพลังการแสดงและดนตรีที่หลากหลาย",
+            "award_title": "รางวัลและความสำเร็จ",
+            "award_desc": "🏆 Rookie of the Year (2020)\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' Asia Tour Sold Out",
+            "menu_home": "🏠 หน้าหลัก / สมาชิก",
+            "menu_about": "🏢 เกี่ยวกับวง TREASURE"
         },
         "en": {
             "sub": "LOVE PULSE : THE 3RD MINI ALBUM | 2026",
@@ -85,6 +161,7 @@ def get_ui_text() -> Dict:
             "tab1": "STORY & FACTS",
             "tab2": "SONGS",
             "tab3": "COVERS",
+            "tab4": "STATS",
             "birth": "BIRTH",
             "height": "HEIGHT",
             "select": "MEMBER SELECTOR",
@@ -95,7 +172,33 @@ def get_ui_text() -> Dict:
             "rec_title": "✨ Recommended",
             "rec_playlist_1": "🎬 OFFICIAL M/V",
             "rec_playlist_2": "💎 TREASURE MAP",
-            "error_member": "Member not found"
+            "error_member": "Member not found",
+            "stats": "Statistics",
+            "total_members": "Members",
+            "your_favorites": "Your Favorites",
+            "total_songs": "Total Songs",
+            "random_member": "🎲 Random Member",
+            "theme": "Theme",
+            "light": "☀️ Light",
+            "dark": "🌙 Dark",
+            "birthday_countdown": "🎂 Birthday Countdown",
+            "days": "days",
+            "add_favorite": "💖 Add to Favorites",
+            "remove_favorite": "❤️ Remove from Favorites",
+            "added_favorite": "Added to favorites! ❤️",
+            "removed_favorite": "Removed from favorites",
+            "loading": "Loading...",
+            "tab_group": "ABOUT GROUP",
+            "debut_date": "Debut Date",
+            "fandom": "Fandom Name",
+            "origin": "Origin",
+            "shows": "Variety Shows",
+            "albums": "Discography",
+            "group_desc": "TREASURE is a boy band under YG Entertainment formed through the survival show 'YG Treasure Box', known for their energetic performances and versatile music.",
+            "award_title": "Awards & Achievements",
+            "award_desc": "🏆 Rookie of the Year (2020)\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' Asia Tour Sold Out",
+            "menu_home": "🏠 Home / Members",
+            "menu_about": "🏢 About TREASURE"
         },
         "kr": {
             "sub": "LOVE PULSE : 세 번째 미니 앨범 | 2026",
@@ -104,6 +207,7 @@ def get_ui_text() -> Dict:
             "tab1": "프로필 & 스토리",
             "tab2": "대표곡",
             "tab3": "커버곡",
+            "tab4": "통계",
             "birth": "생일",
             "height": "신장",
             "select": "멤버 선택",
@@ -114,7 +218,33 @@ def get_ui_text() -> Dict:
             "rec_title": "✨ 추천",
             "rec_playlist_1": "🎬 공식 뮤직비디오",
             "rec_playlist_2": "💎 트레저맵",
-            "error_member": "멤버를 찾을 수 없습니다"
+            "error_member": "멤버를 찾을 수 없습니다",
+            "stats": "통계",
+            "total_members": "멤버",
+            "your_favorites": "내 즐겨찾기",
+            "total_songs": "전체 곡",
+            "random_member": "🎲 랜덤 멤버",
+            "theme": "테마",
+            "light": "☀️ 라이트",
+            "dark": "🌙 다크",
+            "birthday_countdown": "🎂 생일 카운트다운",
+            "days": "일 후",
+            "add_favorite": "💖 즐겨찾기 추가",
+            "remove_favorite": "❤️즐겨찾기 삭제",
+            "added_favorite": "즐겨찾기에 추가되었습니다! ❤️",
+            "removed_favorite": "즐겨찾기에서 삭제되었습니다",
+            "loading": "로딩 중...",
+            "tab_group": "그룹 소개",
+            "debut_date": "데뷔일",
+            "fandom": "팬덤명",
+            "origin": "결성",
+            "shows": "예능",
+            "albums": "디스코그래피",
+            "group_desc": "트레저는 YG 엔터테인먼트 소속 보이그룹으로, 서바이벌 프로그램 'YG 보석함'을 통해 결성되었습니다.",
+            "award_title": "수상 및 성과",
+            "award_desc": "🏆 2020년 신인상 수상\n🏆 MAMA 월드와이드 팬스 초이스\n🌏 'HELLO' 아시아 투어 전석 매진",
+            "menu_home": "🏠 홈 / 멤버",
+            "menu_about": "🏢 트레저 소개"
         },
         "jp": {
             "sub": "LOVE PULSE : サード・ミニアルバム | 2026",
@@ -123,6 +253,7 @@ def get_ui_text() -> Dict:
             "tab1": "プロフィール",
             "tab2": "代表曲",
             "tab3": "カバー",
+            "tab4": "統計",
             "birth": "誕生日",
             "height": "身長",
             "select": "メンバー選択",
@@ -133,7 +264,33 @@ def get_ui_text() -> Dict:
             "rec_title": "✨ おすすめ",
             "rec_playlist_1": "🎬 公式M/V",
             "rec_playlist_2": "💎 TREASURE MAP",
-            "error_member": "メンバーが見つかりません"
+            "error_member": "メンバーが見つかりません",
+            "stats": "統計",
+            "total_members": "メンバー",
+            "your_favorites": "お気に入り",
+            "total_songs": "総曲数",
+            "random_member": "🎲 ランダム",
+            "theme": "テーマ",
+            "light": "☀️ ライト",
+            "dark": "🌙 ダーク",
+            "birthday_countdown": "🎂 誕生日カウントダウン",
+            "days": "日",
+            "add_favorite": "💖 お気に入り追加",
+            "remove_favorite": "❤️ お気に入り削除",
+            "added_favorite": "お気に入りに追加されました! ❤️",
+            "removed_favorite": "お気に入りから削除されました",
+            "loading": "読み込み中...",
+            "tab_group": "グループについて",
+            "debut_date": "デビュー日",
+            "fandom": "ファンダム名",
+            "origin": "結成",
+            "shows": "バラエティ",
+            "albums": "ディスコグラフィ",
+            "group_desc": "TREASUREはYGエンターテインメント所属のボーイズグループで、サバイバル番組「YG宝石箱」を通じて結成されました。",
+            "award_title": "受賞歴",
+            "award_desc": "🏆 2020年 新人賞受賞\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' アジアツアー全席完売",
+            "menu_home": "🏠 ホーム / メンバー",
+            "menu_about": "🏢 TREASUREについて"
         },
         "cn": {
             "sub": "LOVE PULSE : 第三张迷你专辑 | 2026",
@@ -142,6 +299,7 @@ def get_ui_text() -> Dict:
             "tab1": "简介 & 故事",
             "tab2": "热门歌曲",
             "tab3": "翻唱",
+            "tab4": "统计",
             "birth": "生日",
             "height": "身高",
             "select": "选择成员",
@@ -152,110 +310,620 @@ def get_ui_text() -> Dict:
             "rec_title": "✨ 推荐",
             "rec_playlist_1": "🎬 官方M/V",
             "rec_playlist_2": "💎 宝石盒综艺",
-            "error_member": "未找到成员"
+            "error_member": "未找到成员",
+            "stats": "统计数据",
+            "total_members": "成员",
+            "your_favorites": "我的最爱",
+            "total_songs": "歌曲总数",
+            "random_member": "🎲 随机成员",
+            "theme": "主题",
+            "light": "☀️ 明亮",
+            "dark": "🌙 暗黑",
+            "birthday_countdown": "🎂 生日倒计时",
+            "days": "天",
+            "add_favorite": "💖 添加最爱",
+            "remove_favorite": "❤️ 移除最爱",
+            "added_favorite": "已添加到最爱! ❤️",
+            "removed_favorite": "已从最爱移除",
+            "loading": "加载中...",
+            "tab_group": "关于组合",
+            "debut_date": "出道日期",
+            "fandom": "粉丝名称",
+            "origin": "起源",
+            "shows": "综艺节目",
+            "albums": "音乐作品",
+            "group_desc": "TREASURE是YG娱乐旗下的男子组合，通过生存节目《YG宝石盒》结成，以充满活力的表演和多样化的音乐风格著称。",
+            "award_title": "奖项与成就",
+            "award_desc": "🏆 2020年 新人奖\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' 亚洲巡演售罄",
+            "menu_home": "🏠 主页 / 成员",
+            "menu_about": "🏢 关于TREASURE"
         }
     }
 
-def initialize_session_state(members):
-    if "lang" in st.query_params:
-        st.session_state.lang_code = st.query_params["lang"]
+# ============================================
+# 🔄 SESSION STATE MANAGEMENT
+# ============================================
+def initialize_session_state(members: List[Dict]):
+    # Initialize preferences manager
+    if 'preferences' not in st.session_state:
+        st.session_state.preferences = UserPreferences()
+    
+    # Load language
     if 'lang_code' not in st.session_state:
-        st.session_state.lang_code = "th"
+        if "lang" in st.query_params and st.query_params["lang"] in AppConfig.SUPPORTED_LANGUAGES:
+            st.session_state.lang_code = st.query_params["lang"]
+        else:
+            st.session_state.lang_code = AppConfig.DEFAULT_LANGUAGE
+            
     if 'favorites' not in st.session_state:
-        st.session_state.favorites = []
-    if 'param_processed' not in st.session_state:
-        st.session_state.param_processed = False
+        st.session_state.favorites = st.session_state.preferences.load_favorites()
+        
+    if 'theme' not in st.session_state:
+        st.session_state.theme = st.session_state.preferences.load_theme()
+        
+    if 'visit_count' not in st.session_state:
+        st.session_state.visit_count = {}
+    
+    if 'page' not in st.session_state:
+        st.session_state.page = 'members'
+
+    # --- ส่วนที่แก้ไข: เช็ค ID จาก URL ทุกครั้งที่มีการโหลดหน้า ---
+    if "id" in st.query_params:
+        try:
+            idx = int(st.query_params["id"])
+            if 0 <= idx < len(members):
+                # ถ้า ID เปลี่ยน หรือยังไม่มี selected_member ให้เซ็ตค่า
+                current_id = -1
+                if 'selected_member' in st.session_state:
+                    # หา index ของสมาชิกปัจจุบันเพื่อเทียบ
+                    current_name = st.session_state.selected_member.get('name')
+                    current_id = next((i for i, m in enumerate(members) if m['name'] == current_name), -1)
+                
+                if current_id != idx:
+                    st.session_state.selected_member = members[idx]
+                    st.session_state.page = 'members'
+        except (ValueError, TypeError, KeyError):
+            pass
 
 def set_language(code: str):
     st.session_state.lang_code = code
-    st.session_state.param_processed = False
 
 def toggle_favorite(member_name: str):
     if member_name in st.session_state.favorites:
         st.session_state.favorites.remove(member_name)
     else:
         st.session_state.favorites.append(member_name)
+    st.session_state.preferences.save_favorites(st.session_state.favorites)
+
+def toggle_theme():
+    st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
+    st.session_state.preferences.save_theme(st.session_state.theme)
+
+def track_visit(member_name: str):
+    if member_name not in st.session_state.visit_count:
+        st.session_state.visit_count[member_name] = 0
+    st.session_state.visit_count[member_name] += 1
 
 # ============================================
 # 🎨 ENHANCED CSS
 # ============================================
+@st.cache_data
+def get_theme_config(theme: str) -> dict:
+    if theme == "light":
+        return {
+            "bg_gradient": "radial-gradient(circle at 50% 10%, #e3f2fd 0%, #ffffff 90%)",
+            "primary_color": "#1976d2",
+            "glass_bg": "rgba(255, 255, 255, 0.8)",
+            "border_color": "rgba(0, 0, 0, 0.1)",
+            "text_color": "#333",
+            "card_bg": "rgba(255, 255, 255, 0.9)",
+            "secondary_text": "#666"
+        }
+    else:
+        return {
+            "bg_gradient": "radial-gradient(circle at 50% 10%, #1a2a3a 0%, #000000 90%)",
+            "primary_color": "#32E0C4",
+            "glass_bg": "rgba(255, 255, 255, 0.05)",
+            "border_color": "rgba(255, 255, 255, 0.1)",
+            "text_color": "white",
+            "card_bg": "rgba(255, 255, 255, 0.05)",
+            "secondary_text": "#8899a6"
+        }
+
 def inject_custom_css():
-    st.markdown("""
+    theme = st.session_state.get('theme', 'dark')
+    config = get_theme_config(theme)
+    
+    st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Prompt:wght@300;500;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap');
 
-    :root { --primary: #32E0C4; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); --text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-    .stApp { background: radial-gradient(circle at 50% 10%, #1a2a3a 0%, #000000 90%); font-family: 'Prompt', 'Noto Sans KR', 'Noto Sans SC', sans-serif; color: white; }
+    :root {{ 
+        --primary: {config['primary_color']}; 
+        --glass: {config['glass_bg']}; 
+        --border: {config['border_color']}; 
+        --text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        --card-bg: {config['card_bg']};
+        --text-color: {config['text_color']};
+        --secondary-text: {config['secondary_text']};
+    }}
     
-    #MainMenu {visibility: hidden;} footer {visibility: hidden;} 
-    header {visibility: visible !important; background: transparent !important;}
-    [data-testid="stSidebarCollapsedControl"] { color: var(--primary) !important; background-color: rgba(0,0,0,0.5); border-radius: 50%; }
+    /* ----- MINI STATS IN SIDEBAR ----- */
+    .mini-stat-container {{
+        display: flex;
+        justify-content: space-between;
+        gap: 5px;
+        margin-bottom: 20px;
+        background: var(--glass);
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+    }}
+    .mini-stat-box {{
+        text-align: center;
+        flex: 1;
+    }}
+    .mini-stat-number {{
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1.2;
+    }}
+    .mini-stat-label {{
+        font-size: 0.6rem;
+        color: var(--secondary-text);
+        text-transform: uppercase;
+        margin-top: 2px;
+    }}
+    .mini-stat-icon {{
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+        display: block;
+    }}
     
-    section[data-testid="stSidebar"] { background-color: rgba(20, 25, 30, 0.95); border-right: 1px solid var(--border); }
-    div[data-testid="stSidebarNav"] { display: none; }
+    /* ----- VARIETY SHOW BUTTONS (New) ----- */
+    .variety-btn {{
+        background: var(--glass);
+        border: 1px solid var(--border);
+        color: {config['text_color']} !important;
+        padding: 10px 15px;
+        border-radius: 10px;
+        display: block;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+        text-decoration: none !important;
+        cursor: pointer;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }}
+    .variety-btn:hover {{
+        border-color: var(--primary);
+        color: var(--primary) !important;
+        transform: translateX(5px);
+        background: rgba(50, 224, 196, 0.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }}
     
-    .block-container { padding-top: 1rem !important; padding-bottom: 2rem !important; margin-top: 0 !important; max-width: 1400px !important; }
-    div[data-testid="column"] .stButton button { background: transparent !important; border: none !important; font-size: 2rem !important; padding: 0px !important; margin: 0px !important; line-height: 1 !important; opacity: 0.4; transition: all 0.3s ease; }
-    div[data-testid="column"] .stButton button:hover { transform: scale(1.3) !important; opacity: 1 !important; text-shadow: 0 0 20px rgba(50, 224, 196, 0.9); }
+    .stApp {{ 
+        background: {config['bg_gradient']}; 
+        font-family: 'Prompt', 'Noto Sans KR', 'Noto Sans SC', sans-serif; 
+        color: {config['text_color']}; 
+        transition: all 0.5s ease;
+    }}
     
-    .hero-container { text-align: center; margin-top: -20px; animation: fadeIn 1.5s ease-in-out; }
-    .hero-title { font-family: 'Montserrat', sans-serif; font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; letter-spacing: -3px; background: linear-gradient(135deg, #fff 0%, #32E0C4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 40px rgba(50, 224, 196, 0.4); margin: 0; line-height: 1.1; animation: glow 2s ease-in-out infinite alternate; }
-    .hero-subtitle { font-size: clamp(0.9rem, 2vw, 1.2rem); color: #8899a6; letter-spacing: 3px; margin-top: 8px; text-transform: uppercase; }
-    .social-bar { display: flex; justify-content: center; gap: 15px; margin-top: 25px; flex-wrap: wrap; }
-    .social-btn { display: inline-flex; align-items: center; justify-content: center; width: 55px; height: 55px; border-radius: 50%; background: var(--glass); border: 2px solid var(--border); color: white; font-size: 1.6rem; text-decoration: none; transition: all 0.4s; backdrop-filter: blur(10px); }
-    .social-btn:hover { background: rgba(50, 224, 196, 0.2); border-color: var(--primary); transform: translateY(-8px) scale(1.1); box-shadow: 0 8px 25px rgba(50, 224, 196, 0.5); }
+    #MainMenu {{visibility: hidden;}} 
+    footer {{visibility: hidden;}} 
+    header {{visibility: visible !important; background: transparent !important;}}
+    [data-testid="stSidebarCollapsedControl"] {{ 
+        color: var(--primary) !important; 
+        background-color: rgba(0,0,0,0.5); 
+        border-radius: 50%; 
+    }}
     
-    .stTextInput input { background: var(--glass) !important; border: 1px solid var(--border) !important; border-radius: 15px !important; color: white !important; padding: 12px 20px !important; }
-    .stTextInput input:focus { border-color: var(--primary) !important; box-shadow: 0 0 20px rgba(50, 224, 196, 0.3) !important; }
+    section[data-testid="stSidebar"] {{ 
+        background-color: {config['card_bg']}; 
+        border-right: 1px solid var(--border); 
+        backdrop-filter: blur(10px); 
+    }}
     
-    .map-frame { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 30px; padding: 15px; box-shadow: 0 30px 80px rgba(0,0,0,0.7); max-width: 1100px; margin: 1.5rem auto 3rem auto; position: relative; animation: slideUp 1s ease-out; }
-    .main-image { width: 100%; border-radius: 20px; display: block; transition: transform 0.3s ease; }
-    .map-frame:hover .main-image { transform: scale(1.02); }
-    .hotspot { position: absolute; cursor: pointer; z-index: 10; border-radius: 50%; background: rgba(50, 224, 196, 0.02); border: 2px solid rgba(255, 255, 255, 0.3); transition: all 0.4s; }
-    .hotspot:hover { border-color: var(--primary); background: rgba(50, 224, 196, 0.25); transform: scale(1.15); box-shadow: 0 0 30px rgba(50, 224, 196, 0.6); }
+    .block-container {{ 
+        padding-top: 1rem !important; 
+        padding-bottom: 2rem !important; 
+        margin-top: 0 !important; 
+        max-width: 1400px !important; 
+    }}
     
-    .member-card-link { text-decoration: none !important; display: block; }
-    .member-card-overlay { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 3/4; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.3s ease; border: 2px solid rgba(255, 255, 255, 0.1); }
-    .member-card-overlay:hover { transform: translateY(-5px) scale(1.03); border-color: var(--primary); box-shadow: 0 15px 30px rgba(50, 224, 196, 0.4); }
-    .member-img-full { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .member-name-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 60%, transparent 100%); color: white; padding: 20px 5px 10px 5px; text-align: center; font-weight: 700; font-size: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); letter-spacing: 0.5px; }
+    div[data-testid="column"] .stButton button {{ 
+        background: transparent !important; 
+        border: none !important; 
+        font-size: 2rem !important; 
+        padding: 0px !important; 
+        margin: 0px !important; 
+        line-height: 1 !important; 
+        opacity: 0.4; 
+        transition: all 0.3s ease; 
+    }}
+    div[data-testid="column"] .stButton button:hover {{ 
+        transform: scale(1.3) !important; 
+        opacity: 1 !important; 
+        text-shadow: 0 0 20px rgba(50, 224, 196, 0.9); 
+    }}
     
-    .rec-card { background: var(--glass); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border); text-align: center; transition: all 0.3s ease; }
-    .rec-card:hover { transform: translateY(-3px); border-color: var(--primary); background: rgba(50,224,196,0.1); }
-    .rec-img { width: 100%; border-radius: 10px; margin-bottom: 10px; aspect-ratio: 16/9; object-fit: cover; }
+    .hero-container {{ 
+        text-align: center; 
+        margin-top: -20px; 
+        animation: fadeIn 1.5s ease-in-out; 
+    }}
+    .hero-title {{ 
+        font-family: 'Montserrat', sans-serif; 
+        font-size: clamp(3rem, 8vw, 5rem); 
+        font-weight: 900; 
+        letter-spacing: -3px; 
+        background: linear-gradient(135deg, {config['text_color']} 0%, var(--primary) 100%); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        text-shadow: 0 0 40px rgba(50, 224, 196, 0.4); 
+        margin: 0; 
+        line-height: 1.1; 
+        animation: glow 2s ease-in-out infinite alternate; 
+    }}
+    .hero-subtitle {{ 
+        font-size: clamp(0.9rem, 2vw, 1.2rem); 
+        color: var(--secondary-text); 
+        letter-spacing: 3px; 
+        margin-top: 8px; 
+        text-transform: uppercase; 
+    }}
     
-    div[data-testid="stDialog"] div[role="dialog"] { width: 90vw !important; max-width: 1500px !important; background: rgba(15, 20, 25, 0.98) !important; border: 2px solid var(--primary) !important; border-radius: 25px !important; backdrop-filter: blur(20px) !important; }
-    .profile-header { font-family: 'Montserrat', sans-serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; color: var(--primary); line-height: 1; text-shadow: 0 0 30px rgba(50, 224, 196, 0.5); }
-    .profile-cn-name { font-size: clamp(1.2rem, 3vw, 1.8rem); color: #888; font-weight: 400; margin-left: 10px; }
-    .profile-sub { font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: rgba(255,255,255,0.85); margin-bottom: 25px; border-bottom: 2px solid var(--border); padding-bottom: 15px; }
-    .stat-row { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 25px; background: var(--glass); padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
-    .stat-item { text-align: center; flex: 1; }
-    .stat-label { font-size: 0.85rem; color: #999; display: block; text-transform: uppercase; }
-    .stat-val { font-size: 1.5rem; font-weight: 700; color: #fff; }
+    .social-bar {{ 
+        display: flex; 
+        justify-content: center; 
+        gap: 15px; 
+        margin-top: 25px; 
+        flex-wrap: wrap; 
+    }}
+    .social-btn {{ 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        width: 55px; 
+        height: 55px; 
+        border-radius: 50%; 
+        background: var(--glass); 
+        border: 2px solid var(--border); 
+        color: {config['text_color']}; 
+        font-size: 1.6rem; 
+        text-decoration: none; 
+        transition: all 0.4s; 
+        backdrop-filter: blur(10px); 
+    }}
+    .social-btn:hover {{ 
+        background: rgba(50, 224, 196, 0.2); 
+        border-color: var(--primary); 
+        transform: translateY(-8px) scale(1.1); 
+        box-shadow: 0 8px 25px rgba(50, 224, 196, 0.5); 
+    }}
     
-    .story-container { background: rgba(255, 255, 255, 0.03); border-radius: 16px; padding: 25px; border: 1px solid rgba(50, 224, 196, 0.15); position: relative; margin-top: 15px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-    .story-icon-header { position: absolute; top: -18px; left: 20px; background: #0e1117; padding: 5px 15px; border-radius: 20px; border: 1px solid rgba(50, 224, 196, 0.3); color: var(--primary); font-weight: bold; font-size: 0.9rem; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    .story-content { color: #e0e0e0; line-height: 1.8; font-size: 1.05rem; font-weight: 300; }
+    .stTextInput input {{ 
+        background: var(--glass) !important; 
+        border: 1px solid var(--border) !important; 
+        border-radius: 15px !important; 
+        color: {config['text_color']} !important; 
+        padding: 12px 20px !important; 
+    }}
+    .stTextInput input:focus {{ 
+        border-color: var(--primary) !important; 
+        box-shadow: 0 0 20px rgba(50, 224, 196, 0.3) !important; 
+    }}
     
-    .facts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 10px; }
-    .fact-card-modern { background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 15px 10px; text-align: center; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100px; }
-    .fact-card-modern:hover { background: rgba(50, 224, 196, 0.08); border-color: var(--primary); transform: translateY(-3px); }
-    .fact-icon-modern { font-size: 1.8rem; margin-bottom: 8px; filter: drop-shadow(0 0 5px rgba(50, 224, 196, 0.4)); }
-    .fact-label-modern { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-    .fact-value-modern { font-size: 0.95rem; color: #fff; font-weight: 600; line-height: 1.2; word-break: break-word; }
+    .map-frame {{ 
+        background: var(--glass); 
+        backdrop-filter: blur(15px); 
+        border: 1px solid var(--border); 
+        border-radius: 30px; 
+        padding: 15px; 
+        box-shadow: 0 30px 80px rgba(0,0,0,0.3); 
+        max-width: 1100px; 
+        margin: 1.5rem auto 3rem auto; 
+        position: relative; 
+        animation: slideUp 1s ease-out; 
+    }}
+    .main-image {{ 
+        width: 100%; 
+        border-radius: 20px; 
+        display: block; 
+        transition: transform 0.3s ease; 
+    }}
+    .map-frame:hover .main-image {{ transform: scale(1.02); }}
     
-    .song-link { text-decoration: none; }
-    .song-card { display: flex; align-items: center; justify-content: space-between; background: var(--glass); padding: 20px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); transition: all 0.3s ease; }
-    .song-card:hover { background: rgba(50, 224, 196, 0.15); border-color: var(--primary); transform: translateX(8px); }
-    .song-title { color: white; font-weight: 600; font-size: 1.15rem; }
-    .favorite-heart { position: absolute; top: 10px; right: 10px; font-size: 1.5rem; filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.5)); animation: heartbeat 1.5s infinite; z-index: 10; }
+    .member-card-link {{ text-decoration: none !important; display: block; }}
+    .member-card-overlay {{ 
+        position: relative; 
+        border-radius: 15px; 
+        overflow: hidden; 
+        aspect-ratio: 3/4; 
+        cursor: pointer; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+        transition: all 0.3s ease; 
+        border: 2px solid var(--border); 
+        background: var(--card-bg);
+    }}
+    .member-card-overlay:hover {{ 
+        transform: translateY(-5px) scale(1.03); 
+        border-color: var(--primary); 
+        box-shadow: 0 15px 30px rgba(50, 224, 196, 0.4); 
+    }}
+    .member-img-full {{ 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+        display: block; 
+    }}
+    .member-name-overlay {{ 
+        position: absolute; 
+        bottom: 0; 
+        left: 0; 
+        width: 100%; 
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 60%, transparent 100%); 
+        color: white; 
+        padding: 20px 5px 10px 5px; 
+        text-align: center; 
+        font-weight: 700; 
+        font-size: 1rem; 
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
+        letter-spacing: 0.5px; 
+    }}
     
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes glow { from { text-shadow: 0 0 20px rgba(50, 224, 196, 0.3); } to { text-shadow: 0 0 40px rgba(50, 224, 196, 0.7); } }
-    @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    .rec-card {{ 
+        background: var(--glass); 
+        border-radius: 12px; 
+        padding: 15px; 
+        margin-bottom: 20px; 
+        border: 1px solid var(--border); 
+        text-align: center; 
+        transition: all 0.3s ease; 
+        backdrop-filter: blur(10px);
+    }}
+    .rec-card:hover {{ 
+        transform: translateY(-3px); 
+        border-color: var(--primary); 
+        background: rgba(50,224,196,0.1); 
+    }}
     
-    @media (max-width: 768px) { .hero-title { font-size: 3rem !important; } .stat-row { flex-direction: column !important; gap: 10px !important; } div[data-testid="stDialog"] div[role="dialog"] { width: 95vw !important; } }
+    div[data-testid="stDialog"] div[role="dialog"] {{ 
+        width: 90vw !important; 
+        max-width: 1500px !important; 
+        background: {"rgba(255, 255, 255, 0.95)" if theme == "light" else "rgba(15, 20, 25, 0.98)"} !important; 
+        border: 2px solid var(--primary) !important; 
+        border-radius: 25px !important; 
+        backdrop-filter: blur(20px) !important; 
+    }}
+    
+    .profile-header {{ 
+        font-family: 'Montserrat', sans-serif; 
+        font-size: clamp(2.5rem, 5vw, 3.5rem); 
+        font-weight: 800; 
+        color: var(--primary); 
+        line-height: 1; 
+        text-shadow: 0 0 30px rgba(50, 224, 196, 0.5); 
+    }}
+    .profile-cn-name {{ 
+        font-size: clamp(1.2rem, 3vw, 1.8rem); 
+        color: #888; 
+        font-weight: 400; 
+        margin-left: 10px; 
+    }}
+    .profile-sub {{ 
+        font-size: clamp(1.1rem, 2.5vw, 1.5rem); 
+        color: var(--secondary-text); 
+        margin-bottom: 25px; 
+        border-bottom: 2px solid var(--border); 
+        padding-bottom: 15px; 
+    }}
+    
+    .stat-row {{ 
+        display: flex; 
+        justify-content: space-between; 
+        gap: 15px; 
+        margin-bottom: 25px; 
+        background: var(--glass); 
+        padding: 20px; 
+        border-radius: 15px; 
+        border: 1px solid var(--border); 
+        backdrop-filter: blur(10px);
+    }}
+    .stat-item {{ text-align: center; flex: 1; }}
+    .stat-label {{ 
+        font-size: 0.85rem; 
+        color: #999; 
+        display: block; 
+        text-transform: uppercase; 
+    }}
+    .stat-val {{ 
+        font-size: 1.5rem; 
+        font-weight: 700; 
+        color: {config['text_color']}; 
+    }}
+    
+    .story-container {{ 
+        background: var(--glass); 
+        border-radius: 16px; 
+        padding: 25px; 
+        border: 1px solid rgba(50, 224, 196, 0.15); 
+        position: relative; 
+        margin-top: 15px; 
+        margin-bottom: 25px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
+        backdrop-filter: blur(10px);
+    }}
+    .story-icon-header {{ 
+        position: absolute; 
+        top: -18px; 
+        left: 20px; 
+        background: {"#fff" if theme == "light" else "#0e1117"}; 
+        padding: 5px 15px; 
+        border-radius: 20px; 
+        border: 1px solid rgba(50, 224, 196, 0.3); 
+        color: var(--primary); 
+        font-weight: bold; 
+        font-size: 0.9rem; 
+        letter-spacing: 1px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    }}
+    .story-content {{ 
+        color: {"#333" if theme == "light" else "#e0e0e0"}; 
+        line-height: 1.8; 
+        font-size: 1.05rem; 
+        font-weight: 300; 
+    }}
+    
+    .facts-grid {{ 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+        gap: 12px; 
+        margin-top: 10px; 
+    }}
+    .fact-card-modern {{ 
+        background: linear-gradient(145deg, var(--glass) 0%, rgba(255,255,255,0.01) 100%); 
+        border: 1px solid var(--border); 
+        border-radius: 12px; 
+        padding: 15px 10px; 
+        text-align: center; 
+        transition: all 0.3s ease; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        min-height: 100px; 
+        backdrop-filter: blur(10px);
+    }}
+    .fact-card-modern:hover {{ 
+        background: rgba(50, 224, 196, 0.08); 
+        border-color: var(--primary); 
+        transform: translateY(-3px); 
+    }}
+    .fact-icon-modern {{ 
+        font-size: 1.8rem; 
+        margin-bottom: 8px; 
+        filter: drop-shadow(0 0 5px rgba(50, 224, 196, 0.4)); 
+    }}
+    .fact-label-modern {{ 
+        font-size: 0.7rem; 
+        color: #888; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        margin-bottom: 2px; 
+    }}
+    .fact-value-modern {{ 
+        font-size: 0.95rem; 
+        color: {config['text_color']}; 
+        font-weight: 600; 
+        line-height: 1.2; 
+        word-break: break-word; 
+    }}
+    
+    .song-link {{ text-decoration: none; }}
+    .song-card {{ 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        background: var(--glass); 
+        padding: 20px; 
+        border-radius: 12px; 
+        margin-bottom: 12px; 
+        border: 1px solid var(--border); 
+        transition: all 0.3s ease; 
+        backdrop-filter: blur(10px);
+    }}
+    .song-card:hover {{ 
+        background: rgba(50, 224, 196, 0.15); 
+        border-color: var(--primary); 
+        transform: translateX(8px); 
+    }}
+    .song-title {{ 
+        color: {config['text_color']}; 
+        font-weight: 600; 
+        font-size: 1.15rem; 
+    }}
+    
+    .favorite-heart {{ 
+        position: absolute; 
+        top: 10px; 
+        right: 10px; 
+        font-size: 1.5rem; 
+        filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.5)); 
+        animation: heartbeat 1.5s infinite; 
+        z-index: 10; 
+    }}
+    
+    .stats-box {{ 
+        background: var(--glass); 
+        border-radius: 15px; 
+        padding: 20px; 
+        text-align: center; 
+        border: 1px solid var(--border); 
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }}
+    .stats-box:hover {{ 
+        border-color: var(--primary); 
+        transform: translateY(-5px); 
+        box-shadow: 0 10px 30px rgba(50, 224, 196, 0.3); 
+    }}
+    .stats-number {{ 
+        font-size: 2.5rem; 
+        font-weight: 900; 
+        color: var(--primary); 
+        margin: 10px 0; 
+    }}
+    .stats-label {{ 
+        font-size: 0.9rem; 
+        color: #888; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+    }}
+    
+    .birthday-card {{
+        background: var(--glass);
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }}
+    .birthday-card:hover {{
+        border-color: var(--primary);
+        transform: translateX(5px);
+    }}
+    
+    @keyframes fadeIn {{ 
+        from {{ opacity: 0; transform: translateY(30px); }} 
+        to {{ opacity: 1; transform: translateY(0); }} 
+    }}
+    @keyframes slideUp {{ 
+        from {{ opacity: 0; transform: translateY(50px); }} 
+        to {{ opacity: 1; transform: translateY(0); }} 
+    }}
+    @keyframes glow {{ 
+        from {{ text-shadow: 0 0 20px rgba(50, 224, 196, 0.3); }} 
+        to {{ text-shadow: 0 0 40px rgba(50, 224, 196, 0.7); }} 
+    }}
+    @keyframes heartbeat {{ 
+        0%, 100% {{ transform: scale(1); }} 
+        50% {{ transform: scale(1.1); }} 
+    }}
+    
+    @media (max-width: 768px) {{ 
+        .hero-title {{ font-size: 3rem !important; }} 
+        .stat-row {{ flex-direction: column !important; gap: 10px !important; }} 
+        div[data-testid="stDialog"] div[role="dialog"] {{ width: 95vw !important; }}
+        .social-bar {{ gap: 8px; }}
+        .social-btn {{ width: 45px; height: 45px; font-size: 1.2rem; }}
+        .facts-grid {{ grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important; }}
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -268,7 +936,9 @@ def get_members_data() -> List[Dict]:
         {
             "name": "Hyunsuk", 
             "img": "hyunsuk.jpg",
-            "birthday": "1999.04.21", "height": "171 cm", "mbti": "ENFP",
+            "birthday": "1999.04.21", 
+            "height": "171 cm", 
+            "mbti": "ENFP",
             "display_name": {"th": "ชเว ฮยอนซอก", "en": "Choi Hyunsuk", "kr": "최현석", "jp": "チェ・ヒョンソク", "cn": "崔玹硕"},
             "position": {"th": "แร็ปเปอร์, แดนซ์", "en": "Rapper, Dancer", "kr": "래퍼, 댄서", "jp": "ラッパー, ダンサー", "cn": "Rapper, 舞担"},
             "nickname": {"th": "Hedgehog", "en": "Hedgehog", "kr": "칠현석", "jp": "ヒョンソク", "cn": "脆现硕"},
@@ -286,11 +956,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🦔 **英語名:** Danny Choi", "⚽ **趣味:** サッカー, 買い物", "7️⃣ **好きな数字:** 7"],
                 "cn": ["🦔 **英文名:** Danny Choi", "⚽ **爱好:** 足球, 购物", "7️⃣ **幸运数字:** 7"]
             },
-            "songs": ["VolKno", "KING KONG"], "covers": ["Humble"]
+            "songs": ["VolKno", "KING KONG"], 
+            "covers": ["Humble"]
         },
         {
-            "name": "Jihoon", "img": "jihoon.jpg",
-            "birthday": "2000.03.14", "height": "178 cm", "mbti": "ENTJ",
+            "name": "Jihoon", 
+            "img": "jihoon.jpg",
+            "birthday": "2000.03.14", 
+            "height": "178 cm", 
+            "mbti": "ENTJ",
             "display_name": {"th": "พัค จีฮุน", "en": "Park Jihoon", "kr": "박지훈", "jp": "パク・ジフン", "cn": "朴志焄"},
             "position": {"th": "เมนแดนซ์, T5", "en": "Main Dancer, T5", "kr": "메인 댄서, T5", "jp": "メインダンサー, T5", "cn": "主舞, T5"},
             "nickname": {"th": "Hoonie", "en": "Hoonie", "kr": "후니", "jp": "フニ", "cn": "Hoonie"},
@@ -308,11 +982,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🐯 **英語名:** Jun Park", "✈️ **夢:** パイロット", "🔴 **色:** 赤"],
                 "cn": ["🐯 **英文名:** Jun Park", "✈️ **梦想:** 飞行员", "🔴 **颜色:** 红色"]
             },
-            "songs": ["The Way To", "MOVE"], "covers": ["Ko Ko Bop"]
+            "songs": ["The Way To", "MOVE"], 
+            "covers": ["Ko Ko Bop"]
         },
         {
-            "name": "Yoshi", "img": "yoshi.jpg",
-            "birthday": "2000.05.15", "height": "179 cm", "mbti": "INFP",
+            "name": "Yoshi", 
+            "img": "yoshi.jpg",
+            "birthday": "2000.05.15", 
+            "height": "179 cm", 
+            "mbti": "INFP",
             "display_name": {"th": "คาเนโมโตะ โยชิโนริ", "en": "Kanemoto Yoshinori", "kr": "요시노리", "jp": "金本芳典", "cn": "金本芳典"},
             "position": {"th": "เมนแร็ปเปอร์", "en": "Main Rapper", "kr": "메인 래퍼", "jp": "メインラッパー", "cn": "主Rapper"},
             "nickname": {"th": "Dark Horse", "en": "Dark Horse", "kr": "다크호스", "jp": "ダークホース", "cn": "黑马"},
@@ -330,11 +1008,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🐯 **英語名:** Jaden", "🏎️ **夢:** レーサー", "🎨 **趣味:** グラフィティ"],
                 "cn": ["🐯 **英文名:** Jaden", "🏎️ **梦想:** 赛车手", "🎨 **爱好:** 涂鸦"]
             },
-            "songs": ["STUPID", "KING KONG"], "covers": ["Fancy"]
+            "songs": ["STUPID", "KING KONG"], 
+            "covers": ["Still Life"]
         },
         {
-            "name": "Junkyu", "img": "junkyu.jpg",
-            "birthday": "2000.09.09", "height": "178 cm", "mbti": "INFJ",
+            "name": "Junkyu", 
+            "img": "junkyu.jpg",
+            "birthday": "2000.09.09", 
+            "height": "178 cm", 
+            "mbti": "INFJ",
             "display_name": {"th": "คิม จุนกยู", "en": "Kim Junkyu", "kr": "김준규", "jp": "キム・ジュンギュ", "cn": "金俊奎"},
             "position": {"th": "ลีดเดอร์ (2025+), T5", "en": "Leader (2025+), T5", "kr": "리더 (2025+), T5", "jp": "リーダー (2025+), T5", "cn": "队长 (2025+), T5"},
             "nickname": {"th": "Handsome Koala", "en": "Handsome Koala", "kr": "코알라", "jp": "コアラ", "cn": "帅气考拉"},
@@ -352,11 +1034,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🐨 **英語名:** David Kim", "🐱 **ペット:** Ruby, Aengdu", "👕 **体格:** フィジカル天才"],
                 "cn": ["🐨 **英文名:** David Kim", "🐱 **宠物:** Ruby, Aengdu", "👕 **身材:** 脸蛋天才"]
             },
-            "songs": ["MOVE", "YELLOW"], "covers": ["Latch"]
+            "songs": ["MOVE", "YELLOW"], 
+            "covers": ["Latch"]
         },
         {
-            "name": "Jaehyuk", "img": "jaehyuk.jpg",
-            "birthday": "2001.07.23", "height": "178 cm", "mbti": "INFP",
+            "name": "Jaehyuk", 
+            "img": "jaehyuk.jpg",
+            "birthday": "2001.07.23", 
+            "height": "178 cm", 
+            "mbti": "INFP",
             "display_name": {"th": "ยุน แจฮยอก", "en": "Yoon Jaehyuk", "kr": "윤재혁", "jp": "ユン・ジェヒョク", "cn": "尹材赫"},
             "position": {"th": "โวคอล, T5", "en": "Vocalist, T5", "kr": "보컬, T5", "jp": "ボーカル, T5", "cn": "副主唱, T5"},
             "nickname": {"th": "Chow Chow", "en": "Chow Chow", "kr": "윤다정", "jp": "ジェヒョク", "cn": "尹多情"},
@@ -374,11 +1060,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🦁 **英語名:** Kevin Yoon", "🤚 **利き手:** 左利き", "💖 **魅力:** 優しい"],
                 "cn": ["🦁 **英文名:** Kevin Yoon", "🤚 **惯用手:** 左手", "💖 **魅力:** 温柔"]
             },
-            "songs": ["MOVE", "Wonderland"], "covers": ["Ring Ring"]
+            "songs": ["MOVE", "Wonderland"], 
+            "covers": ["Ring Ring"]
         },
         {
-            "name": "Asahi", "img": "asahi.jpg",
-            "birthday": "2001.08.20", "height": "172 cm", "mbti": "INFP",
+            "name": "Asahi", 
+            "img": "asahi.jpg",
+            "birthday": "2001.08.20", 
+            "height": "172 cm", 
+            "mbti": "INFP",
             "display_name": {"th": "ฮามาดะ อาซาฮิ", "en": "Hamada Asahi", "kr": "하마다 아사히", "jp": "浜田朝光", "cn": "滨田朝光"},
             "position": {"th": "ลีดเดอร์ (2025+), T5", "en": "Leader (2025+), T5", "kr": "리더 (2025+), T5", "jp": "リーダー (2025+), T5", "cn": "队长 (2025+), T5"},
             "nickname": {"th": "Robot", "en": "Robot", "kr": "로봇", "jp": "ロボット", "cn": "机器人"},
@@ -387,7 +1077,7 @@ def get_members_data() -> List[Dict]:
                 "en": "From Osaka. Name means 'Morning Sunshine'. Co-Leader (2025).",
                 "kr": "오사카 출신. 이름 뜻은 '아침 햇살'. 공동 리더 (2025).",
                 "jp": "大阪出身。名前の意味は「朝の光」。共同リーダー (2025)。",
-                "cn": "来自大阪。名字意为“晨光”。共同队长 (2025)。"
+                "cn": "来自大阪。名字意为'晨光'。共同队长 (2025)。"
             },
             "facts": {
                 "th": ["🤖 **English Name:** Arthur", "⚽ **Hobby:** Football", "🎨 **Skill:** Art"],
@@ -396,11 +1086,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🤖 **英語名:** Arthur", "⚽ **趣味:** サッカー", "🎨 **特技:** アート"],
                 "cn": ["🤖 **英文名:** Arthur", "⚽ **爱好:** 足球", "🎨 **特长:** 艺术"]
             },
-            "songs": ["THANK YOU", "CLAP!"], "covers": ["Lay Me Down"]
+            "songs": ["THANK YOU", "CLAP!"], 
+            "covers": ["Lay Me Down"]
         },
         {
-            "name": "Doyoung", "img": "doyoung.jpg",
-            "birthday": "2003.12.04", "height": "177 cm", "mbti": "ESTP",
+            "name": "Doyoung", 
+            "img": "doyoung.jpg",
+            "birthday": "2003.12.04", 
+            "height": "177 cm", 
+            "mbti": "ESTP",
             "display_name": {"th": "คิม โดยอง", "en": "Kim Doyoung", "kr": "김도영", "jp": "キム・ドヨン", "cn": "金道荣"},
             "position": {"th": "เมนแดนซ์, T5", "en": "Main Dancer, T5", "kr": "메인 댄서, T5", "jp": "メインダンサー, T5", "cn": "主舞, T5"},
             "nickname": {"th": "Dobby", "en": "Dobby", "kr": "도비", "jp": "ドビ", "cn": "Dobby"},
@@ -418,11 +1112,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🛹 **英語名:** Sam", "✝️ **洗礼名:** ニコラス", "🍳 **特技:** 料理"],
                 "cn": ["🛹 **英文名:** Sam", "✝️ **洗礼名:** Nicholas", "🍳 **特长:** 烹饪"]
             },
-            "songs": ["WONDERLAND", "MOVE"], "covers": ["Freedom"]
+            "songs": ["WONDERLAND", "MOVE"], 
+            "covers": ["Freedom"]
         },
         {
-            "name": "Haruto", "img": "haruto.jpg",
-            "birthday": "2004.04.05", "height": "183.2 cm", "mbti": "INFP",
+            "name": "Haruto", 
+            "img": "haruto.jpg",
+            "birthday": "2004.04.05", 
+            "height": "183.2 cm", 
+            "mbti": "INFP",
             "display_name": {"th": "วาตานาเบะ ฮารุโตะ", "en": "Watanabe Haruto", "kr": "와타나베 하루토", "jp": "渡辺温斗", "cn": "渡边温斗"},
             "position": {"th": "เมนแร็ปเปอร์", "en": "Main Rapper", "kr": "메인 래퍼", "jp": "メインラッパー", "cn": "主Rapper"},
             "nickname": {"th": "Ruto", "en": "Ruto", "kr": "루토", "jp": "ルト", "cn": "Ruto"},
@@ -440,11 +1138,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🦋 **英語名:** Travis", "📏 **身長:** 183.2 cm", "📝 **特技:** 作詞"],
                 "cn": ["🦋 **英文名:** Travis", "📏 **身高:** 183.2 cm", "📝 **特长:** 作词"]
             },
-            "songs": ["G.O.A.T", "KING KONG"], "covers": ["FLASH"]
+            "songs": ["G.O.A.T", "KING KONG"], 
+            "covers": ["FLASH"]
         },
         {
-            "name": "Jeongwoo", "img": "jeongwoo.jpg",
-            "birthday": "2004.09.28", "height": "181 cm", "mbti": "ISFP",
+            "name": "Jeongwoo", 
+            "img": "jeongwoo.jpg",
+            "birthday": "2004.09.28", 
+            "height": "181 cm", 
+            "mbti": "ISFP",
             "display_name": {"th": "พัค จองอู", "en": "Park Jeongwoo", "kr": "박정우", "jp": "パク・ジョンウ", "cn": "朴炡禹"},
             "position": {"th": "เมนโวคอล", "en": "Main Vocalist", "kr": "메인 보컬", "jp": "メインボーカル", "cn": "主唱"},
             "nickname": {"th": "Vocal King", "en": "Vocal King", "kr": "보컬 킹", "jp": "ボーカルキング", "cn": "声乐天才"},
@@ -462,11 +1164,15 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🐺 **英語名:** Justin", "🤚 **利き手:** 左利き", "🎤 **役割:** メインボーカル"],
                 "cn": ["🐺 **英文名:** Justin", "🤚 **惯用手:** 左手", "🎤 **担当:** 主唱"]
             },
-            "songs": ["PARADISE", "DARARI"], "covers": ["Superstar"]
+            "songs": ["PARADISE", "DARARI"], 
+            "covers": ["Superstar"]
         },
         {
-            "name": "Junghwan", "img": "junghwan.jpg",
-            "birthday": "2005.02.18", "height": "180.3 cm", "mbti": "ENFP-T",
+            "name": "Junghwan", 
+            "img": "junghwan.jpg",
+            "birthday": "2005.02.18", 
+            "height": "180.3 cm", 
+            "mbti": "ENFP-T",
             "display_name": {"th": "โซ จองฮวาน", "en": "So Junghwan", "kr": "소정환", "jp": "ソ・ジョンファン", "cn": "苏庭焕"},
             "position": {"th": "น้องเล็ก, T5", "en": "Maknae, T5", "kr": "막내, T5", "jp": "末っ子, T5", "cn": "忙内, T5"},
             "nickname": {"th": "Super King Cow Baby", "en": "Super King Cow Baby", "kr": "소해금", "jp": "ジョンファン", "cn": "超级牛宝宝"},
@@ -484,200 +1190,429 @@ def get_members_data() -> List[Dict]:
                 "jp": ["🐮 **英語名:** John", "🥋 **チーム:** K-TIGERS", "❄️ **季節:** 冬"],
                 "cn": ["🐮 **英文名:** John", "🥋 **队伍:** K-TIGERS", "❄️ **季节:** 冬天"]
             },
-            "songs": ["B.O.M.B", "MOVE"], "covers": ["Lie"]
+            "songs": ["B.O.M.B", "MOVE"], 
+            "covers": ["Lie"]
         }
     ]
 
+# ============================================
+# 🎂 BIRTHDAY COUNTDOWN
+# ============================================
+def get_next_birthday(birthday_str: str) -> Tuple[int, datetime]:
+    try:
+        if not birthday_str or birthday_str == '-':
+            return 365, datetime.now()
+        parts = birthday_str.split('.')
+        if len(parts) != 3: return 365, datetime.now()
+        today = datetime.now()
+        month, day = int(parts[1]), int(parts[2])
+        next_birthday = datetime(today.year, month, day)
+        if next_birthday < today:
+            next_birthday = datetime(today.year + 1, month, day)
+        days_until = (next_birthday - today).days
+        return days_until, next_birthday
+    except (ValueError, IndexError, TypeError):
+        return 365, datetime.now()
+
+def render_birthday_section(members: List[Dict], t: Dict, lang: str):
+    st.markdown(f"<h3 style='text-align:center; color: var(--primary); margin: 30px 0 20px 0;'>{t.get('birthday_countdown', '🎂 Birthday Countdown')}</h3>", unsafe_allow_html=True)
+    upcoming = []
+    for m in members:
+        days, date = get_next_birthday(m.get('birthday', '2000.01.01'))
+        upcoming.append((m, days, date))
+    upcoming.sort(key=lambda x: x[1])
+    cols = st.columns(min(3, len(upcoming)))
+    for i, (member, days, date) in enumerate(upcoming[:3]):
+        with cols[i]:
+            member_display_name = member.get('display_name', {}).get(lang, member.get('name', 'Member'))
+            member_birthday = member.get('birthday', '-')
+            st.markdown(f"""
+            <div class="birthday-card">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🎂</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 5px;">{member_display_name}</div>
+                    <div style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">{member_birthday}</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: var(--primary);">{days}</div>
+                    <div style="font-size: 0.8rem; color: #888;">{t.get('days', 'days')}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+# ============================================
+# 📱 SIDEBAR
+# ============================================
 def render_sidebar(members: List[Dict], t: Dict, lang: str):
-    """Render the sidebar with recommendations"""
     with st.sidebar:
-        st.markdown(f"<h2 style='color:#32E0C4; text-align:center;'>{t['rec_title']}</h2>", unsafe_allow_html=True)
+        total_songs = sum(len(m.get('songs', [])) for m in members)
+        st.markdown(f"<h2 style='color:#32E0C4; text-align:center;'>{t.get('rec_title', '✨ Recommended')}</h2>", unsafe_allow_html=True)
         st.markdown("<hr style='border-color: rgba(255,255,255,0.1); margin-top:0;'>", unsafe_allow_html=True)
         
-        # 1. Recommended Playlist (Official M/V)
-        st.markdown(f"<div style='text-align:center; margin-bottom:10px; color:#aaa; font-size:0.9rem;'>{t['rec_playlist_1']}</div>", unsafe_allow_html=True)
-        
-        playlist_url_1 = "https://www.youtube.com/watch?v=zjJs3I4hsCg&list=PLG4U66ceLh82hyGL6sE6Cp1nG2uNLtlAm&pp=0gcJCbUEOCosWNin"
-        cover_img_1 = "https://i.ytimg.com/vi/zjJs3I4hsCg/hqdefault.jpg"
-        
+        # MINI STATS
         st.markdown(f"""
-        <a href="{playlist_url_1}" target="_blank" style="text-decoration:none;">
-            <div class="rec-card" style="padding:0; overflow:hidden; position:relative;">
-                <img src="{cover_img_1}" style="width:100%; display:block; opacity:0.9; transition:0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9">
-                <div style="position:absolute; bottom:0; left:0; width:100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color:#32E0C4; padding:10px; font-weight:bold; font-size:0.9rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
-                    ▶ WATCH DANCE PRACTICE VIDEO
-                </div>
+        <div class="mini-stat-container">
+            <div class="mini-stat-box">
+                <span class="mini-stat-icon">👥</span>
+                <div class="mini-stat-number">{len(members)}</div>
+                <div class="mini-stat-label">{t.get('total_members', 'Members')}</div>
             </div>
-        </a>
-        <div style="text-align:center; font-size:0.8rem; color:#888; margin-top:5px;">
-            TREASURE - DANCE PRACTICE VIDEO 💎
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # 2. Recommended Playlist (T-MAP)
-        st.markdown(f"<div style='text-align:center; margin-bottom:10px; color:#aaa; font-size:0.9rem;'>{t['rec_playlist_2']}</div>", unsafe_allow_html=True)
-        
-        playlist_url_2 = "https://www.youtube.com/playlist?list=PLG4U66ceLh80BCE_NxXdEsltXlgpchO6R"
-        cover_img_2 = "https://i.ytimg.com/vi/M4oBygBkgGQ/hqdefault.jpg"
-        
-        st.markdown(f"""
-        <a href="{playlist_url_2}" target="_blank" style="text-decoration:none;">
-            <div class="rec-card" style="padding:0; overflow:hidden; position:relative;">
-                <img src="{cover_img_2}" style="width:100%; display:block; opacity:0.9; transition:0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9">
-                <div style="position:absolute; bottom:0; left:0; width:100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color:#32E0C4; padding:10px; font-weight:bold; font-size:0.9rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
-                    ▶ TREASURE MAP
-                </div>
+            <div class="mini-stat-box" style="border-left: 1px solid var(--border); border-right: 1px solid var(--border);">
+                <span class="mini-stat-icon">💖</span>
+                <div class="mini-stat-number">{len(st.session_state.favorites)}</div>
+                <div class="mini-stat-label">Favs</div>
             </div>
-        </a>
-        <div style="text-align:center; font-size:0.8rem; color:#888; margin-top:5px;">
-            Variety Show 🤣
+            <div class="mini-stat-box">
+                <span class="mini-stat-icon">🎵</span>
+                <div class="mini-stat-number">{total_songs}+</div>
+                <div class="mini-stat-label">Songs</div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-# ============================================
-# 🎯 MAIN APPLICATION
-# ============================================
-def main():
-    members = get_members_data()
-    initialize_session_state(members)
-    inject_custom_css()
-    
-    ui_text = get_ui_text()
-    lang = st.session_state.lang_code
-    t = ui_text[lang]
-    
-    # Sidebar
-    render_sidebar(members, t, lang)
-    
-    # ====== FLAG SELECTOR ======
-    c_spacer, c_th, c_en, c_kr, c_jp, c_cn = st.columns([10, 0.7, 0.7, 0.7, 0.7, 0.7])
-    with c_th: st.button("🇹🇭", on_click=set_language, args=("th",), key="f_th")
-    with c_en: st.button("🇬🇧", on_click=set_language, args=("en",), key="f_en")
-    with c_kr: st.button("🇰🇷", on_click=set_language, args=("kr",), key="f_kr")
-    with c_jp: st.button("🇯🇵", on_click=set_language, args=("jp",), key="f_jp")
-    with c_cn: st.button("🇨🇳", on_click=set_language, args=("cn",), key="f_cn")
-    
-    # ====== HERO SECTION ======
-    st.markdown(f"""
-    <div class="hero-container">
-        <h1 class="hero-title">TREASURE</h1>
-        <p class="hero-subtitle">{t['sub']}</p>
-        <div class="social-bar">
-            <a href="https://www.instagram.com/yg_treasure_official/" target="_blank" class="social-btn">📸</a>
-            <a href="https://www.facebook.com/OfficialTreasure" target="_blank" class="social-btn">📘</a>
-            <a href="https://weverse.io/treasure/feed" target="_blank" class="social-btn">🍀</a>
-            <a href="https://www.youtube.com/@TREASURE" target="_blank" class="social-btn">📺</a>
-            <a href="https://twitter.com/treasuremembers" target="_blank" class="social-btn">🐦</a>
-        </div>
-    </div><br>
-    """, unsafe_allow_html=True)
-    
-    # ====== SEARCH BAR ======
-    search_query = st.text_input(label="search", placeholder=f"🔍 {t['search']}...", label_visibility="collapsed")
-    filtered_members = [m for m in members if search_query.lower() in m['display_name'][lang].lower() or search_query.lower() in m['name'].lower()] if search_query else members
-    
-    # ====== QUERY PARAMETER HANDLER ======
-    if "id" in st.query_params and not st.session_state.param_processed:
-        try:
-            idx = int(st.query_params["id"])
-            if 0 <= idx < len(members):
-                st.session_state.selected_member = members[idx]
-                st.session_state.param_processed = True
-                st.query_params.clear()
-                st.rerun()
-        except ValueError:
-            st.query_params.clear()
-    
-    # ====== IMAGE MAP (URL Placeholder) ======
-    group_img_src = get_image_src("group.jpg") 
-    if "placeholder" in group_img_src:
-         group_img_src = "https://kprofiles.com/wp-content/uploads/2020/01/TREASURE-Concept-Photo-1-scaled.jpg"
-
-    st.markdown(f"""
-    <div class="map-frame"><img src="{group_img_src}" class="main-image"></div>
-    <p style="text-align:center;color:#666;font-size:0.9rem;margin-top:-10px;">{t['touch']}</p>
-    """, unsafe_allow_html=True)
-    
-    # ====== MODAL DIALOG ======
-    if "selected_member" in st.session_state:
-        show_member_modal(st.session_state.selected_member, t, lang)
-    
-    # ====== MEMBER GRID ======
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.session_state.favorites:
-        st.markdown(f"<h4 style='text-align:center; color:#32E0C4; margin-bottom:20px;'>💖 {t['favorite']}</h4>", unsafe_allow_html=True)
-        fav_members = [m for m in members if m['name'] in st.session_state.favorites]
-        render_member_grid(fav_members, t, lang, show_heart=True)
+        # --- NAVIGATION BUTTONS ---
+        st.markdown(f"<h4 style='color:var(--secondary-text); font-size:0.9rem; margin-bottom:10px;'>MENU</h4>", unsafe_allow_html=True)
+        
+        if st.button(f"{t.get('menu_home', '🏠 Home / Members')}", use_container_width=True, type="primary" if st.session_state.page == 'members' else "secondary"):
+            st.session_state.page = 'members'
+            st.rerun()
+            
+        if st.button(f"{t.get('menu_about', '🏢 About Group')}", use_container_width=True, type="primary" if st.session_state.page == 'about' else "secondary"):
+            st.session_state.page = 'about'
+            st.rerun()
+            
+        st.markdown("---")
+        
+        st.markdown(f"<div style='text-align:center; margin-bottom:10px; color:#aaa; font-size:0.9rem;'>{t.get('rec_playlist_1', '🎬 OFFICIAL M/V')}</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <a href="https://www.youtube.com/watch?v=zjJs3I4hsCg&list=PLG4U66ceLh82hyGL6sE6Cp1nG2uNLtlAm" target="_blank" style="text-decoration:none;">
+            <div class="rec-card" style="padding:0; overflow:hidden; position:relative;">
+                <img src="https://i.ytimg.com/vi/zjJs3I4hsCg/hqdefault.jpg" style="width:100%; display:block; opacity:0.9; transition:0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9">
+                <div style="position:absolute; bottom:0; left:0; width:100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color:#32E0C4; padding:10px; font-weight:bold; font-size:0.9rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">▶ WATCH DANCE PRACTICE VIDEO</div>
+            </div>
+        </a>
+        """, unsafe_allow_html=True)
+        
         st.markdown("<br>", unsafe_allow_html=True)
-    
-    st.markdown(f"<h4 style='text-align:center; color:#32E0C4; margin-bottom:20px; opacity:0.8;'>{t['select']}</h4>", unsafe_allow_html=True)
-    if not filtered_members:
-        st.info(f"🔍 {t['error_member']}")
-    else:
-        render_member_grid(filtered_members, t, lang)
-    
-    # ====== FOOTER ======
-    st.markdown("""
-    <div style="text-align:center; margin-top:60px; padding: 25px; border-top: 1px solid rgba(255,255,255,0.1); opacity:0.6; font-size:0.85rem;">
-        <p style="margin:0;">💎 TREASURE MAKER PROJECT 2026</p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown(f"<div style='text-align:center; margin-bottom:10px; color:#aaa; font-size:0.9rem;'>{t.get('rec_playlist_2', '💎 TREASURE MAP')}</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <a href="https://www.youtube.com/playlist?list=PLG4U66ceLh80BCE_NxXdEsltXlgpchO6R" target="_blank" style="text-decoration:none;">
+            <div class="rec-card" style="padding:0; overflow:hidden; position:relative;">
+                <img src="https://i.ytimg.com/vi/M4oBygBkgGQ/hqdefault.jpg" style="width:100%; display:block; opacity:0.9; transition:0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9">
+                <div style="position:absolute; bottom:0; left:0; width:100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color:#32E0C4; padding:10px; font-weight:bold; font-size:0.9rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">▶ TREASURE MAP</div>
+            </div>
+        </a>
+        """, unsafe_allow_html=True)
 
-def render_member_grid(members: List[Dict], t: Dict, lang: str, show_heart: bool = False):
-    cols_per_row = 5
+# ============================================
+# 🎯 MEMBER GRID RENDERING
+# ============================================
+def render_member_grid(members: List[Dict], t: Dict, lang: str, all_members: List[Dict], show_heart: bool = False):
+    cols_per_row = AppConfig.COLS_PER_ROW
     for i in range(0, len(members), cols_per_row):
         cols = st.columns(min(cols_per_row, len(members) - i))
         for j, col in enumerate(cols):
             with col:
                 real_idx = i + j
-                m = members[real_idx]
-                img_src = get_image_src(m['img'], m['name']) 
-                heart_html = f'<div class="favorite-heart">❤️</div>' if show_heart else ''
-                st.markdown(f'''<div style="position: relative;"><a href="?id={real_idx}&lang={lang}" target="_self" class="member-card-link"><div class="member-card-overlay">{heart_html}<img src="{img_src}" class="member-img-full" alt="{m['display_name'][lang]}"><div class="member-name-overlay">{m['display_name'][lang]}</div></div></a></div>''', unsafe_allow_html=True)
+                if real_idx < len(members):
+                    m = members[real_idx]
+                    try:
+                        member_name = m.get('name', 'Member')
+                        member_img = m.get('img', '')
+                        member_display_name = m.get('display_name', {}).get(lang, member_name)
+                        img_src = get_image_src(member_img, member_name)
+                        heart_html = '<div class="favorite-heart">❤️</div>' if show_heart else ''
+                        actual_idx = next((idx for idx, member in enumerate(all_members) if member.get('name') == member_name), 0)
+                        safe_name = urllib.parse.quote(member_name)
+                        st.markdown(f'''<div style="position: relative;">
+<a href="?id={actual_idx}&lang={lang}" target="_self" class="member-card-link">
+<div class="member-card-overlay">
+        {heart_html}
+<img src="{img_src}" class="member-img-full" alt="{member_display_name}" onerror="this.src='https://ui-avatars.com/api/?name={safe_name}&background=32E0C4&color=fff&size=400'">
+<div class="member-name-overlay">{member_display_name}</div>
+</div>
+</a></div>''', unsafe_allow_html=True)
+                    except Exception as e:
+                        st.error(f"❌ Error: {str(e)}")
+
         st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
-def show_member_modal(sel: Dict, t: Dict, lang: str):
-    @st.dialog(f"💎 {sel['name']}", width="large")
+# ============================================
+# 🏢 GROUP INFO RENDERER (UPDATED LINKS)
+# ============================================
+def render_group_info(t: Dict, lang: str):
+    """Render About Group section (Full Page)"""
+    
+    links = {
+        "tmap": "https://www.youtube.com/results?search_query=TREASURE+MAP+EP.1",
+        "tmi": "https://www.youtube.com/results?search_query=TREASURE+T.M.I",
+        "3min": "https://www.youtube.com/results?search_query=3+Minute+TREASURE",
+        "fact": "https://www.youtube.com/results?search_query=TREASURE+Fact+Check",
+        "ttalk": "https://www.youtube.com/results?search_query=TREASURE+T-Talk",
+        "solo": "https://www.youtube.com/results?search_query=TREASURE+Shining+Solo"
+    }
+
+    st.markdown(f"""
+<div style="background: var(--glass); border-radius: 20px; padding: 30px; border: 1px solid var(--border); margin-bottom: 30px;">
+    <h2 style="color: var(--primary); text-align: center; margin-bottom: 20px;">💎 TREASURE PROFILE</h2>
+        
+<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-bottom: 30px;">
+    <div style="flex: 1; min-width: 250px; background: rgba(50, 224, 196, 0.1); padding: 15px; border-radius: 12px; text-align: center;">
+    <div style="font-size: 2rem;">📅</div>
+    <div style="font-weight: bold; color: var(--primary);">{t.get('debut_date', 'Debut Date')}</div>
+    <div>August 7, 2020</div>
+    </div>
+<div style="flex: 1; min-width: 250px; background: rgba(50, 224, 196, 0.1); padding: 15px; border-radius: 12px; text-align: center;">
+    <div style="font-size: 2rem;">💎</div>
+    <div style="font-weight: bold; color: var(--primary);">{t.get('fandom', 'Fandom')}</div>
+    <div>Treasure Maker (Teume)</div>
+    </div>
+<div style="flex: 1; min-width: 250px; background: rgba(50, 224, 196, 0.1); padding: 15px; border-radius: 12px; text-align: center;">
+    <div style="font-size: 2rem;">📺</div>
+    <div style="font-weight: bold; color: var(--primary);">{t.get('origin', 'Origin')}</div>
+    <div>YG Treasure Box</div>
+    </div>
+</div>
+
+<p style="text-align: center; line-height: 1.6; margin-bottom: 30px; font-size: 1.1rem; color: var(--text-color);">
+            {t.get('group_desc', '')}
+</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+<div style="background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid var(--border);">
+<h3 style="color: var(--primary);">💿 {t.get('albums', 'Discography')}</h3>
+<ul style="list-style-type: none; padding: 0; line-height: 1.8;">
+    <li>✨ <strong>2020:</strong> THE FIRST STEP Series (Chapter 1, 2, 3)</li>
+    <li>🔥 <strong>2021:</strong> THE FIRST STEP: TREASURE EFFECT</li>
+    <li>⚡ <strong>2022:</strong> THE SECOND STEP: CHAPTER ONE & TWO</li>
+    <li>🚀 <strong>2023:</strong> REBOOT (2nd Full Album)</li>
+    <li>🦍 <strong>2024:</strong> KING KONG (Digital Single)</li>
+    <li>🔮 <strong>2026:</strong> LOVE PULSE (Latest)</li>
+</ul>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px;">
+<div style="background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid var(--border);">
+<h3 style="color: var(--primary);">🎬 {t.get('shows', 'Web Shows')}</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        
+<a href="{links['tmap']}" target="_blank" class="variety-btn" style="border-color: var(--primary); background: rgba(50, 224, 196, 0.1);">
+        💎 Treasure Map ↗
+    </a>
+<a href="{links['tmi']}" target="_blank" class="variety-btn">T.M.I ↗</a>
+<a href="{links['3min']}" target="_blank" class="variety-btn">3-Minute Treasure ↗</a>
+<a href="{links['fact']}" target="_blank" class="variety-btn">Fact Check ↗</a>
+<a href="{links['ttalk']}" target="_blank" class="variety-btn">T-Talk ↗</a>
+<a href="{links['solo']}" target="_blank" class="variety-btn">✨ Shining Solo ↗</a>
+
+</div>
+</div>
+                
+<div style="background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid var(--border); flex: 1;">
+    <h3 style="color: var(--primary);">{t.get('award_title', 'Awards')}</h3>
+<div style="white-space: pre-line; line-height: 1.6;">
+                        {t.get('award_desc', '')}
+</div>
+</div>
+</div>
+</div>
+</div>
+    """, unsafe_allow_html=True)
+
+# ============================================
+# 💬 MEMBER MODAL
+# ============================================
+def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
+    @st.dialog(f"💎 {sel.get('name', 'Member')}", width="large")
     def modal_content():
-        c1, c2 = st.columns([1.5, 2.5])
-        with c1:
-            st.markdown(f'<img src="{get_image_src(sel["img"])}" style="width:100%; border-radius:15px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); margin-bottom: 20px;">', unsafe_allow_html=True)
-            st.markdown(f"""<div class="stat-row"><div class="stat-item"><span class="stat-label">{t['birth']}</span><span class="stat-val">{sel['birthday']}</span></div><div class="stat-item"><span class="stat-label">{t['height']}</span><span class="stat-val">{sel['height']}</span></div></div><div class="stat-row"><div class="stat-item"><span class="stat-label">MBTI</span><span class="stat-val">{sel['mbti']}</span></div></div><div style="text-align:center; margin-top:-10px; color:#32E0C4; font-weight:900; font-size:1.3rem;">"{sel['nickname'][lang]}"</div>""", unsafe_allow_html=True)
-            fav_text = "Remove" if sel['name'] in st.session_state.favorites else "Add to Favorites"
-            if st.button(f"❤️ {fav_text}", use_container_width=True, key=f"fav_{sel['name']}"):
-                toggle_favorite(sel['name'])
+        try:
+            member_name = sel.get('name', 'Member')
+            member_img = sel.get('img', '')
+            c1, c2 = st.columns([1.5, 2.5])
+            with c1:
+                img_src = get_image_src(member_img, member_name)
+                safe_name = urllib.parse.quote(member_name)
+                st.markdown(f'<img src="{img_src}" style="width:100%; border-radius:15px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); margin-bottom: 20px;" onerror="this.src=\'https://ui-avatars.com/api/?name={safe_name}&background=32E0C4&color=fff&size=400\'">', unsafe_allow_html=True)
+                
+                # ... (ส่วนแสดงสถิติเหมือนเดิม) ...
+                st.markdown(f"""
+                <div class="stat-row">
+                    <div class="stat-item"><span class="stat-label">{t.get('birth', 'Birth')}</span><span class="stat-val">{sel.get('birthday', '-')}</span></div>
+                    <div class="stat-item"><span class="stat-label">{t.get('height', 'Height')}</span><span class="stat-val">{sel.get('height', '-')}</span></div>
+                </div>
+                <div class="stat-row"><div class="stat-item"><span class="stat-label">MBTI</span><span class="stat-val">{sel.get('mbti', '-')}</span></div></div>
+                <div style="text-align:center; margin-top:-10px; color:#32E0C4; font-weight:900; font-size:1.3rem;">"{sel.get('nickname', {}).get(lang, '-')}"</div>
+                """, unsafe_allow_html=True)
+                
+                days, _ = get_next_birthday(sel.get('birthday', '2000.01.01'))
+                st.markdown(f"""
+                <div style="text-align:center; margin-top:20px; padding:15px; background:var(--glass); border-radius:12px; border:1px solid var(--border);">
+                    <div style="font-size:0.8rem; color:#888; margin-bottom:5px;">🎂 {t.get('birthday_countdown', 'Birthday')}</div>
+                    <div style="font-size:1.8rem; font-weight:900; color:var(--primary);">{days}</div>
+                    <div style="font-size:0.8rem; color:#888;">{t.get('days', 'days')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                is_favorite = member_name in st.session_state.favorites
+                fav_text = t.get('remove_favorite', '❤️ Remove') if is_favorite else t.get('add_favorite', '💖 Add')
+                if st.button(fav_text, use_container_width=True, key=f"fav_{member_name}"):
+                    toggle_favorite(member_name)
+                    st.rerun()
+            
+            with c2:
+                # ... (ส่วนแสดงผลด้านขวาเหมือนเดิม) ...
+                display_name = sel.get('display_name', {}).get(lang, member_name)
+                cn_name = sel.get('display_name', {}).get('cn', '')
+                cn_name_html = f'<span class="profile-cn-name">{cn_name}</span>' if cn_name else ''
+                position = sel.get('position', {}).get(lang, '-')
+                st.markdown(f"<div class='profile-header'>{display_name}{cn_name_html}</div><div class='profile-sub'>{position}</div>", unsafe_allow_html=True)
+                
+                tab1, tab2, tab3 = st.tabs([f"📖 {t.get('tab1', 'Profile')}", f"🎵 {t.get('tab2', 'Songs')}", f"🎤 {t.get('tab3', 'Covers')}"])
+                
+                with tab1:
+                    history = sel.get('history', {}).get(lang, "No information available")
+                    st.markdown(f"""<div class="story-container"><div class="story-icon-header">✨ {t.get('story_title', 'Story')}</div><div class="story-content">{history}</div></div>""", unsafe_allow_html=True)
+                    st.markdown(f"<h4 style='color:#32E0C4; margin-bottom:10px; margin-top:20px;'>{t.get('facts_title', 'Facts')}</h4>", unsafe_allow_html=True)
+                    facts_html = '<div class="facts-grid">'
+                    for fact_str in sel.get('facts', {}).get(lang, []):
+                        try:
+                            parts = fact_str.split("**")
+                            if len(parts) >= 3:
+                                facts_html += f'<div class="fact-card-modern"><div class="fact-icon-modern">{parts[0].strip()}</div><div class="fact-label-modern">{parts[1].replace(":", "").strip()}</div><div class="fact-value-modern">{parts[2].strip()}</div></div>'
+                            else: facts_html += f'<div class="fact-card-modern"><div class="fact-value-modern">{fact_str}</div></div>'
+                        except: facts_html += f'<div class="fact-card-modern"><div class="fact-value-modern">{fact_str}</div></div>'
+                    st.markdown(facts_html + '</div>', unsafe_allow_html=True)
+                
+                with tab2:
+                    for s in sel.get('songs', []): st.markdown(f'<a href="https://www.youtube.com/results?search_query=TREASURE+{member_name}+{s}" target="_blank" class="song-link"><div class="song-card"><span class="song-title">🎵 {s}</span><span>↗</span></div></a>', unsafe_allow_html=True)
+                
+                with tab3:
+                    for c in sel.get('covers', []): st.markdown(f'<a href="https://www.youtube.com/results?search_query=TREASURE+{member_name}+{c}+cover" target="_blank" class="song-link"><div class="song-card"><span class="song-title">🎧 {c}</span><span>↗</span></div></a>', unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # --- แก้ไขปุ่มปิด: ให้ล้าง query params ด้วย ---
+            if st.button(f"✕ {t.get('close', 'Close')}", use_container_width=True, type="primary", key="close_modal"):
+                if 'selected_member' in st.session_state: 
+                    del st.session_state.selected_member
+                # ล้างค่าใน URL เพื่อไม่ให้เด้งกลับมาอีก
+                st.query_params.clear()
                 st.rerun()
-        with c2:
-            cn_name_html = f'<span class="profile-cn-name">{sel["display_name"].get("cn", "")}</span>'
-            st.markdown(f"<div class='profile-header'>{sel['display_name'][lang]}{cn_name_html}</div><div class='profile-sub'>{sel['position'][lang]}</div>", unsafe_allow_html=True)
-            tab1, tab2, tab3 = st.tabs([f"📖 {t['tab1']}", f"🎵 {t['tab2']}", f"🎤 {t['tab3']}"])
-            with tab1:
-                st.markdown(f"""<div class="story-container"><div class="story-icon-header">✨ {t['story_title']}</div><div class="story-content">{sel.get('history', {}).get(lang, "-")}</div></div>""", unsafe_allow_html=True)
-                st.markdown(f"<h4 style='color:#32E0C4; margin-bottom:10px; margin-top:20px;'>{t['facts_title']}</h4>", unsafe_allow_html=True)
-                facts_html = '<div class="facts-grid">'
-                for fact_str in sel.get('facts', {}).get(lang, []):
-                    try:
-                        parts = fact_str.split("**")
-                        if len(parts) >= 3:
-                            facts_html += f"""<div class="fact-card-modern"><div class="fact-icon-modern">{parts[0].strip()}</div><div class="fact-label-modern">{parts[1].replace(":", "").strip()}</div><div class="fact-value-modern">{parts[2].strip()}</div></div>"""
-                        else:
-                            facts_html += f'<div class="fact-card-modern"><div class="fact-value-modern">{fact_str}</div></div>'
-                    except:
-                         facts_html += f'<div class="fact-card-modern"><div class="fact-value-modern">{fact_str}</div></div>'
-                facts_html += '</div>'
-                st.markdown(facts_html, unsafe_allow_html=True)
-            with tab2:
-                for s in sel.get('songs', []): st.markdown(f"""<a href="https://www.youtube.com/results?search_query=TREASURE+{sel['name']}+{s}" target="_blank" class="song-link"><div class="song-card"><span class="song-title">🎵 {s}</span><span>↗</span></div></a>""", unsafe_allow_html=True)
-            with tab3:
-                for c in sel.get('covers', []): st.markdown(f"""<a href="https://www.youtube.com/results?search_query=TREASURE+{sel['name']}+{c}+cover" target="_blank" class="song-link"><div class="song-card"><span class="song-title">🎧 {c}</span><span>↗</span></div></a>""", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button(f"✕ {t['close']}", use_container_width=True, type="primary"):
-            del st.session_state.selected_member
-            st.rerun()
+                
+        except Exception as e:
+            st.error(f"⚠️ Error: {str(e)}")
+            
     modal_content()
 
-if __name__ == "__main__":
+# ============================================
+# 🚀 MAIN APP EXECUTION
+# ============================================
+def main():
+    try:
+        members = get_members_data()
+        if not members:
+            st.error("❌ Cannot load member data")
+            return
+            
+        initialize_session_state(members)
+        inject_custom_css()
+        
+        ui_text = get_ui_text()
+        lang = st.session_state.get('lang_code', 'th')
+        t = ui_text.get(lang, ui_text['th'])
+        
+        render_sidebar(members, t, lang)
+        
+        # Language Flags
+        c_spacer, c_th, c_en, c_kr, c_jp, c_cn = st.columns([10, 0.7, 0.7, 0.7, 0.7, 0.7])
+        with c_th: st.button("🇹🇭", on_click=set_language, args=("th",), key="f_th")
+        with c_en: st.button("🇬🇧", on_click=set_language, args=("en",), key="f_en")
+        with c_kr: st.button("🇰🇷", on_click=set_language, args=("kr",), key="f_kr")
+        with c_jp: st.button("🇯🇵", on_click=set_language, args=("jp",), key="f_jp")
+        with c_cn: st.button("🇨🇳", on_click=set_language, args=("cn",), key="f_cn")
+        
+        # Hero Section
+        st.markdown(f"""
+        <div class="hero-container">
+            <h1 class="hero-title">TREASURE</h1>
+            <p class="hero-subtitle">{t.get('sub', 'LOVE PULSE : THE 3RD MINI ALBUM | 2026')}</p>
+            <div class="social-bar">
+                <a href="https://www.instagram.com/yg_treasure_official/" target="_blank" class="social-btn">📸</a>
+                <a href="https://www.facebook.com/OfficialTreasure" target="_blank" class="social-btn">📘</a>
+                <a href="https://weverse.io/treasure/feed" target="_blank" class="social-btn">🍀</a>
+                <a href="https://www.youtube.com/@TREASURE" target="_blank" class="social-btn">📺</a>
+                <a href="https://twitter.com/treasuremembers" target="_blank" class="social-btn">🐦</a>
+            </div>
+        </div><br>
+        """, unsafe_allow_html=True)
+        
+        # --- PAGE SWITCHING LOGIC ---
+        if st.session_state.page == 'members':
+            st.markdown("<br>", unsafe_allow_html=True)
+            render_birthday_section(members, t, lang)
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Search
+            search_query = st.text_input(
+                label="search", 
+                placeholder=f"🔍 {t.get('search', 'Search members')}...", 
+                label_visibility="collapsed",
+                key="member_search"
+            )
+            
+            filtered_members = [
+                m for m in members 
+                if search_query.lower() in m.get('display_name', {}).get(lang, '').lower() 
+                or search_query.lower() in m.get('name', '').lower()
+            ] if search_query else members
+            
+            # Modal
+            if "selected_member" in st.session_state:
+                show_member_modal(st.session_state.selected_member, t, lang, members)
+            
+            # Group Image
+            group_img_src = get_image_src("group.jpg", "TREASURE") 
+            if "placeholder" in group_img_src or "ui-avatars" in group_img_src:
+                group_img_src = "https://kprofiles.com/wp-content/uploads/2020/01/TREASURE-Concept-Photo-1-scaled.jpg"
 
+            st.markdown(f"""
+            <div class="map-frame">
+                <img src="{group_img_src}" class="main-image" alt="TREASURE Group Photo">
+            </div>
+            <p style="text-align:center;color:#666;font-size:0.9rem;margin-top:-10px;">{t.get('touch', 'Touch member to view profile')}</p>
+            """, unsafe_allow_html=True)
+            
+            # Member Grid
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            
+            if st.session_state.favorites:
+                st.markdown(f"<h4 style='text-align:center; color:#32E0C4; margin-bottom:20px;'>💖 {t.get('favorite', 'Favorites')}</h4>", unsafe_allow_html=True)
+                fav_members = [m for m in members if m.get('name', '') in st.session_state.favorites]
+                render_member_grid(fav_members, t, lang, members, show_heart=True)
+                st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown(f"<h4 style='text-align:center; color:#32E0C4; margin-bottom:20px; opacity:0.8;'>{t.get('select', 'Select Member')}</h4>", unsafe_allow_html=True)
+            
+            if not filtered_members:
+                st.info(f"🔍 {t.get('error_member', 'Member not found')}")
+            else:
+                render_member_grid(filtered_members, t, lang, members)
+                
+        elif st.session_state.page == 'about':
+            render_group_info(t, lang)
+        
+        # Footer
+        st.markdown(f"""
+        <div style="text-align:center; margin-top:60px; padding: 25px; border-top: 1px solid rgba(255,255,255,0.1); opacity:0.6; font-size:0.85rem;">
+            <p style="margin:0;">💎 TREASURE MAKER PROJECT 2026</p>
+            <p style="margin:5px 0 0 0; font-size:0.75rem;">Theme: {st.session_state.theme.title()} Mode | Favorites: {len(st.session_state.favorites)}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    except Exception as e:
+        st.error(f"⚠️ Critical Error: {str(e)}")
+        st.exception(e)
+        if st.button("🔄 Reset App", type="primary"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+
+if __name__ == "__main__":
     main()
