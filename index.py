@@ -1326,7 +1326,7 @@ def get_members_data() -> List[Dict]:
             "mbti": "ENFP",
             "display_name": {"th": "ชเว ฮยอนซอก", "en": "Choi Hyunsuk", "kr": "최현석", "jp": "チェ・ヒョンソク", "cn": "崔玹硕"},
             "position": {"th": "ลีดเดอร์, แร็ปเปอร์, แดนซ์", "en": "Leader, Rapper, Dancer", "kr": "리더, 래퍼, 댄서", "jp": "リーダー, ラッパー", "cn": "队长, Rapper"},
-            "nickname": {"th": "Ddaeng", "en": "Ddaeng", "kr": "댕", "jp": "デン", "cn": "Ddaeng"},
+            "nickname": {"th": "7chill", "en": "7chill", "kr": "7chill", "jp": "7chill", "cn": "7chill"},
             "history": {
                 "th": "พี่ใหญ่และผู้นำแฟชั่นของวง ผ่านรายการ MIXNINE (อันดับ 5) เป็นเด็กฝึกยาวนานที่สุดในวง",
                 "en": "Eldest member and fashionista. MIXNINE Rank 5. Longest trainee period.",
@@ -2180,4 +2180,5 @@ def main():
             st.rerun()
 
 if __name__ == "__main__":
+
     main()
