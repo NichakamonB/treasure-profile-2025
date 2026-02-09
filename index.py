@@ -4,6 +4,7 @@ import os
 import urllib.parse
 import random
 import json
+import uuid
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -73,6 +74,252 @@ class UserPreferences:
         data = self.load_all()
         data['theme'] = theme
         return self.save_all(data)
+    
+    # ============================================
+# 💬 COMMENT SYSTEM
+# ============================================
+class CommentSystem:
+    def __init__(self, file_path="fan_comments.json"):
+        self.file_path = file_path
+
+    def load_comments(self) -> List[Dict]:
+        if not os.path.exists(self.file_path):
+            return []
+        try:
+            with open(self.file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return []
+
+    def save_all_comments(self, comments):
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump(comments, f, ensure_ascii=False, indent=2)
+
+    def add_comment(self, name, member, message, owner_id): 
+        comments = self.load_comments()
+        new_comment = {
+            "id": str(uuid.uuid4()),
+            "owner_id": owner_id,  # 👈 บันทึกว่าใครเป็นคนโพสต์
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "name": name,
+            "member": member,
+            "message": message,
+            "avatar": random.choice(["💎", "💙", "🐯", "🐨", "🐰", "🦋", "🐺", "🐮", "🦔", "🤖"])
+        }
+        comments.insert(0, new_comment)
+        self.save_all_comments(comments[:50]) # เก็บ 50 อันล่าสุด
+
+    def delete_comment(self, comment_id):
+        comments = self.load_comments()
+        comments = [c for c in comments if c.get('id') != comment_id]
+        self.save_all_comments(comments)
+
+    def edit_comment(self, comment_id, new_message):
+        comments = self.load_comments()
+        for c in comments:
+            if c.get('id') == comment_id:
+                c['message'] = new_message
+                c['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M") + " (Edited)"
+                break
+        self.save_all_comments(comments)
+
+        
+
+def render_cheer_board(t: Dict, members: List[Dict]):
+    comment_sys = CommentSystem()
+    
+    # Initialize State
+    if 'editing_id' not in st.session_state:
+        st.session_state.editing_id = None
+
+    # ดึง User ID ปัจจุบัน (ต้องมีใน session_state จาก initialize_session_state)
+    current_user_id = st.session_state.get('user_session_id', '')
+
+    # --- ส่วนหัวข้อ ---
+    st.markdown(f"""
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: var(--primary); text-shadow: 0 0 20px rgba(50,224,196,0.5);">{t.get('cheer_title', 'CHEER BOARD')}</h1>
+        <p style="color: var(--secondary-text);">{t.get('cheer_desc', 'Send love to TREASURE')}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # --- INPUT FORM ---
+    if st.session_state.editing_id is None:
+        with st.container():
+            st.markdown('<div style="background: var(--glass); padding: 20px; border-radius: 15px; border: 1px solid var(--primary);">', unsafe_allow_html=True)
+            
+            with st.form("cheer_form", clear_on_submit=True):
+                col1, col2 = st.columns([1, 1])
+                
+                with col1:
+                    is_anon = st.session_state.get("chk_anon", False)
+                    if is_anon:
+                        val_name = t.get('anon_name', "Teume")
+                        st.text_input(t.get('form_name', "Name"), value=val_name, disabled=True, key="input_name_disabled")
+                        final_name = val_name
+                    else:
+                        user_name = st.text_input(t.get('form_name', "Name"), placeholder="Teume...", key="input_name_enabled")
+                        final_name = user_name
+                    st.checkbox(t.get('anon_label', "Send Anonymously"), key="chk_anon")
+
+                with col2:
+                    dev_option = t.get('select_dev', "To: Developer")
+                    options = [t.get('select_all', "To: TREASURE")] + [m['name'] for m in members] + [dev_option]
+                    member_select = st.selectbox(t.get('form_tag', "Tag Member"), options)
+                
+                msg_input = st.text_area(t.get('form_msg', "Message"), placeholder="Write something nice...", height=100)
+                
+                submitted = st.form_submit_button(t.get('btn_send', "Send"), use_container_width=True)
+                
+                if submitted:
+                    if final_name and msg_input:
+                        # ส่ง current_user_id ไปบันทึกด้วย
+                        comment_sys.add_comment(final_name, member_select, msg_input, current_user_id)
+                        st.success(t.get('success_msg', "Sent!"))
+                        st.rerun()
+                    else:
+                        st.warning("Please fill in all fields")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- DISPLAY COMMENTS ---
+    st.markdown(f"<h3 style='margin-top: 40px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;'>{t.get('recent_comments', 'Recent Comments')}</h3>", unsafe_allow_html=True)
+    
+    is_admin = st.session_state.get('is_admin_active', False)
+
+    comments = comment_sys.load_comments()
+    
+    if not comments:
+        st.info("No comments yet. Be the first one! 💎")
+    else:
+        # CSS สำหรับปุ่มเล็ก
+        st.markdown("""
+        <style>
+            .small-btn button {
+                padding: 0px 5px !important;
+                font-size: 0.75rem !important;
+                min-height: 0px !important;
+                height: 28px !important;
+                line-height: 1 !important;
+                border: 1px solid var(--border) !important;
+                background-color: rgba(255,255,255,0.05) !important;
+            }
+            .small-btn button:hover {
+                border-color: var(--primary) !important;
+                color: var(--primary) !important;
+                background-color: rgba(50, 224, 196, 0.1) !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+        for i, c in enumerate(comments):
+            c_id = c.get('id', str(i))
+            owner_id = c.get('owner_id', '')
+            
+            is_dev_msg = "Developer" in c.get('member', '') or "ผู้พัฒนา" in c.get('member', '') or "开发者" in c.get('member', '')
+            border_color = "#FFD700" if is_dev_msg else "var(--primary)"
+
+            # ตรวจสอบสิทธิ์: เป็น Admin หรือ เจ้าของข้อความ
+            is_owner = (owner_id == current_user_id) and (current_user_id != '')
+            can_manage = is_admin or is_owner
+
+            # --- EDIT MODE ---
+            if st.session_state.editing_id == c_id and can_manage:
+                with st.container():
+                    st.markdown(f'<div style="background:var(--glass); padding:15px; border-radius:12px; border:2px solid {border_color}; margin-bottom:15px;">', unsafe_allow_html=True)
+                    st.caption(f"Editing...")
+                    edit_text = st.text_area("Edit", value=c.get('message', ''), key=f"edit_area_{c_id}", label_visibility="collapsed")
+                    
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        if st.button(t.get('btn_save_edit', "Save"), key=f"save_{c_id}", use_container_width=True, type="primary"):
+                            comment_sys.edit_comment(c_id, edit_text)
+                            st.session_state.editing_id = None
+                            st.rerun()
+                    with c2:
+                        if st.button(t.get('btn_cancel', "Cancel"), key=f"cancel_{c_id}", use_container_width=True):
+                            st.session_state.editing_id = None
+                            st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
+            
+            # --- VIEW MODE ---
+            else:
+                with st.container():
+                    # 1. ส่วนเนื้อหาข้อความ
+                    # ถ้ามีสิทธิ์จัดการ (can_manage) เราจะปิด border ด้านล่าง เพื่อให้เชื่อมกับกล่องปุ่ม
+                    bottom_style = "border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0px;" if can_manage else "border-bottom: 1px solid var(--border); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin-bottom: 15px;"
+                    
+                    st.markdown(f"""
+                    <div style="
+                        background: var(--glass); 
+                        padding: 15px 15px 5px 15px;
+                        border-top-left-radius: 12px;
+                        border-top-right-radius: 12px;
+                        border-left: 4px solid {border_color};
+                        border-right: 1px solid var(--border);
+                        border-top: 1px solid var(--border);
+                        {bottom_style}
+                    ">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <div style="font-weight: bold; color: {border_color}; font-size: 0.9rem;">
+                                {c.get('avatar', '💎')} {c.get('name', 'Teume')}
+                                <span style="font-size: 0.75rem; color: #888; font-weight: normal;"> ➤ {c.get('member', 'TREASURE')}</span>
+                            </div>
+                            <div style="font-size: 0.7rem; color: #666;">{c.get('timestamp', '')}</div>
+                        </div>
+                        <div style="color: var(--text-color); font-size: 0.95rem; line-height: 1.4; white-space: pre-wrap;">{c.get('message', '')}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # 2. ส่วนปุ่ม (แสดงเฉพาะถ้ามีสิทธิ์)
+                    if can_manage:
+                        st.markdown(f"""
+                        <div style="
+                            background: var(--glass);
+                            padding: 0px 10px 10px 10px;
+                            border-bottom-left-radius: 12px;
+                            border-bottom-right-radius: 12px;
+                            border-left: 4px solid {border_color};
+                            border-right: 1px solid var(--border);
+                            border-bottom: 1px solid var(--border);
+                            margin-bottom: 15px;
+                        ">
+                        """, unsafe_allow_html=True)
+                        
+                        # ใช้ Columns จัดปุ่มไปขวาสุด (8 ส่วนว่าง : 1 ปุ่ม : 1 ปุ่ม)
+                        c1, c2, c3 = st.columns([8, 1, 1])
+                        
+                        with c2:
+                            st.markdown('<div class="small-btn">', unsafe_allow_html=True)
+                            if st.button("✏️", key=f"ed_{c_id}", help="Edit"):
+                                st.session_state.editing_id = c_id
+                                st.rerun()
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        with c3:
+                            st.markdown('<div class="small-btn">', unsafe_allow_html=True)
+                            if st.button("🗑️", key=f"del_{c_id}", help="Delete"):
+                                comment_sys.delete_comment(c_id)
+                                st.rerun()
+                            st.markdown('</div>', unsafe_allow_html=True)
+
+                        st.markdown("</div>", unsafe_allow_html=True) # ปิด div กล่องปุ่ม
+
+
+# ============================================
+# 🔐 ADMIN MODAL
+# ============================================
+@st.dialog("🔐 Admin Login")
+def admin_login_modal():
+    st.write("Enter Admin Password / กรุณาใส่รหัสผ่าน")
+    password = st.text_input("Password", type="password", key="modal_password_input") # เปลี่ยน key เพื่อความชัวร์
+    
+    if st.button("Login", use_container_width=True, type="primary"):
+        if password == "teume123":  # รหัสผ่าน
+            st.session_state.is_admin_active = True
+            st.success("Access Granted! ✅")
+            st.rerun()
+        else:
+            st.error("Incorrect Password ❌")
 
 # ============================================
 # 🖼️ IMAGE UTILITIES
@@ -152,7 +399,25 @@ def get_ui_text() -> Dict:
             "award_title": "รางวัลและความสำเร็จ",
             "award_desc": "🏆 Rookie of the Year (2020)\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' Asia Tour Sold Out",
             "menu_home": "🏠 หน้าหลัก / สมาชิก",
-            "menu_about": "🏢 เกี่ยวกับวง TREASURE"
+            "menu_about": "🏢 เกี่ยวกับวง TREASURE",
+            "menu_cheer": "💬 ส่งกำลังใจ / Fan Zone",
+            "cheer_title": "💎 TEUME CHEER BOARD",
+            "cheer_desc": "ส่งข้อความให้กำลังใจเมมเบอร์ที่คุณรัก!ถึงแม้น้องๆ อาจจะไม่ได้มาอ่านด้วยตัวเองทันที แต่การเขียนข้อความดีๆก็เป็นพลังบวกให้กับด้อม",
+            "form_name": "ชื่อของคุณ (Your Name)",
+            "form_tag": "เมนของคุณ / ส่งถึงใคร?",
+            "form_msg": "ข้อความ (Message)",
+            "btn_send": "🚀 ส่งข้อความ",
+            "recent_comments": "ข้อความล่าสุด",
+            "select_all": "💙 ถึง: TREASURE (วง)",
+            "success_msg": "ส่งข้อความเรียบร้อยแล้ว!",
+            "anon_label": "🥷 ส่งแบบไม่ระบุตัวตน",
+            "anon_name": "ทึเม (ไม่ระบุชื่อ)",
+            "select_dev": "👨‍💻 ถึง: ผู้พัฒนาแอป (Developer)",
+            "btn_edit": "✏️ แก้ไข",
+            "btn_delete": "🗑️ ลบ",
+            "btn_save_edit": "💾 บันทึก",
+            "btn_cancel": "❌ ยกเลิก",
+            "confirm_delete": "ลบข้อความนี้?"
         },
         "en": {
             "sub": "LOVE PULSE : THE 3RD MINI ALBUM | 2026",
@@ -198,7 +463,25 @@ def get_ui_text() -> Dict:
             "award_title": "Awards & Achievements",
             "award_desc": "🏆 Rookie of the Year (2020)\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' Asia Tour Sold Out",
             "menu_home": "🏠 Home / Members",
-            "menu_about": "🏢 About TREASURE"
+            "menu_about": "🏢 About TREASURE",
+            "menu_cheer": "💬 Fan Zone / Cheer",
+            "cheer_title": "💎 TEUME CHEER BOARD",
+            "cheer_desc": "Send your love and support to members! Even if the members don't see it right away, your kind words bring positive energy to the fandom!",
+            "form_name": "Your Name",
+            "form_tag": "Who is your bias? / To whom?",
+            "form_msg": "Message",
+            "btn_send": "🚀 Send Cheer",
+            "recent_comments": "Recent Cheers",
+            "select_all": "💙 To: TREASURE (All)",
+            "success_msg": "Message sent successfully!",
+            "anon_label": "🥷 Send Anonymously",
+            "anon_name": "Teume (Anonymous)",
+            "select_dev": "👨‍💻 To: Developer",
+            "btn_edit": "✏️ Edit",
+            "btn_delete": "🗑️ Delete",
+            "btn_save_edit": "💾 Save",
+            "btn_cancel": "❌ Cancel",
+            "confirm_delete": "Delete this?"
         },
         "kr": {
             "sub": "LOVE PULSE : 세 번째 미니 앨범 | 2026",
@@ -244,7 +527,25 @@ def get_ui_text() -> Dict:
             "award_title": "수상 및 성과",
             "award_desc": "🏆 2020년 신인상 수상\n🏆 MAMA 월드와이드 팬스 초이스\n🌏 'HELLO' 아시아 투어 전석 매진",
             "menu_home": "🏠 홈 / 멤버",
-            "menu_about": "🏢 트레저 소개"
+            "menu_about": "🏢 트레저 소개",
+            "menu_cheer": "💬 팬 존 / 응원하기",
+            "cheer_title": "💎 트레저 메이커 응원 게시판",
+            "cheer_desc": "멤버들에게 사랑의 메시지를 보내세요! 멤버들이 바로 보지 못하더라도, 여러분의 따뜻한 말은 팬덤에게 큰 힘이 됩니다!",
+            "form_name": "닉네임 (Nickname)",
+            "form_tag": "최애 멤버 / 받는 사람",
+            "form_msg": "응원 메시지",
+            "btn_send": "🚀 응원 보내기",
+            "recent_comments": "최신 응원글",
+            "select_all": "💙 TO: 트레저 (전체)",
+            "success_msg": "메시지가 전송되었습니다! 💌",
+            "anon_label": "🥷 익명으로 보내기",
+            "anon_name": "트메 (익명)",
+            "select_dev": "👨‍💻 TO: 개발자 (Developer)",
+            "btn_edit": "✏️ 수정",
+            "btn_delete": "🗑️ 삭제",
+            "btn_save_edit": "💾 저장",
+            "btn_cancel": "❌ 취소",
+            "confirm_delete": "삭제하시겠습니까?"
         },
         "jp": {
             "sub": "LOVE PULSE : サード・ミニアルバム | 2026",
@@ -290,7 +591,25 @@ def get_ui_text() -> Dict:
             "award_title": "受賞歴",
             "award_desc": "🏆 2020年 新人賞受賞\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' アジアツアー全席完売",
             "menu_home": "🏠 ホーム / メンバー",
-            "menu_about": "🏢 TREASUREについて"
+            "menu_about": "🏢 TREASUREについて",
+            "menu_cheer": "💬 ファンゾーン / 応援",
+            "cheer_title": "💎 TEUME 応援ボード",
+            "cheer_desc": "メンバーに愛と応援を送りましょう！ メンバーにすぐ届かなくても、あなたの温かい言葉はファンダムの大きな力になります！",
+            "form_name": "ニックネーム (Nickname)",
+            "form_tag": "推しメン / 宛先",
+            "form_msg": "メッセージ",
+            "btn_send": "🚀 応援を送る",
+            "recent_comments": "最近のメッセージ",
+            "select_all": "💙 TO: TREASURE (全員)",
+            "success_msg": "メッセージが送信されました！ 💌",
+            "anon_label": "🥷 匿名で送信",
+            "anon_name": "トゥメ (匿名)",
+            "select_dev": "👨‍💻 TO: 開発者 (Developer)",
+            "btn_edit": "✏️ 編集",
+            "btn_delete": "🗑️ 削除",
+            "btn_save_edit": "💾 保存",
+            "btn_cancel": "❌ キャンセル",
+            "confirm_delete": "削除しますか？"
         },
         "cn": {
             "sub": "LOVE PULSE : 第三张迷你专辑 | 2026",
@@ -336,7 +655,26 @@ def get_ui_text() -> Dict:
             "award_title": "奖项与成就",
             "award_desc": "🏆 2020年 新人奖\n🏆 MAMA Worldwide Fans' Choice\n🌏 'HELLO' 亚洲巡演售罄",
             "menu_home": "🏠 主页 / 成员",
-            "menu_about": "🏢 关于TREASURE"
+            "menu_about": "🏢 关于TREASURE",
+            "menu_cheer": "💬 粉丝专区 / 应援",
+            "cheer_title": "💎 TEUME 应援板",
+            "cheer_desc": "给成员们发送充满爱意的应援吧！即使成员们无法第一时间看到，温暖的留言也能为饭圈带来正能量！",
+            "form_name": "昵称 (Nickname)",
+            "form_tag": "本命 / 发送给",
+            "form_msg": "应援留言",
+            "btn_send": "🚀 发送应援",
+            "recent_comments": "最新留言",
+            "select_all": "💙 TO: TREASURE (全员)",
+            "success_msg": "发送成功！ 💌",
+            "anon_label": "🥷 匿名发送",
+            "anon_name": "TEUME (匿名)",
+            "select_dev": "👨‍💻 TO: 开发者 (Developer)",
+            "btn_edit": "✏️ 编辑",
+            "btn_delete": "🗑️ 删除",
+            "btn_save_edit": "💾 保存",
+            "btn_cancel": "❌ 取消",
+            "confirm_delete": "确定删除吗？"
+
         }
     }
 
@@ -950,11 +1288,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "出生于江南的大哥。BIGBANG的粉丝。MIXNINE第5名。前队长 (2020-2024)。"
             },
             "facts": {
-                "th": ["🦔 **English Name:** Danny Choi", "⚽ **Hobby:** ฟุตบอล, ช้อปปิ้ง", "7️⃣ **Fav Number:** 7"],
-                "en": ["🦔 **English Name:** Danny Choi", "⚽ **Hobby:** Soccer, Shopping", "7️⃣ **Fav Number:** 7"],
-                "kr": ["🦔 **영어 이름:** Danny Choi", "⚽ **취미:** 축구, 쇼핑", "7️⃣ **좋아하는 숫자:** 7"],
-                "jp": ["🦔 **英語名:** Danny Choi", "⚽ **趣味:** サッカー, 買い物", "7️⃣ **好きな数字:** 7"],
-                "cn": ["🦔 **英文名:** Danny Choi", "⚽ **爱好:** 足球, 购物", "7️⃣ **幸运数字:** 7"]
+                "th": ["🦔 **English Name:** Danny Choi", "💎 **Gemstone:** Garnet (โกเมน)", "🩸 **Blood Type:** A", "⚽ **Hobby:** ฟุตบอล, ช้อปปิ้ง", "7️⃣ **Fav Number:** 7"],
+                "en": ["🦔 **English Name:** Danny Choi", "💎 **Gemstone:** Garnet", "🩸 **Blood Type:** A", "⚽ **Hobby:** Soccer, Shopping", "7️⃣ **Fav Number:** 7"],
+                "kr": ["🦔 **영어 이름:** Danny Choi", "💎 **보석:** 가넷", "🩸 **혈액형:** A형", "⚽ **취미:** 축구, 쇼핑", "7️⃣ **좋아하는 숫자:** 7"],
+                "jp": ["🦔 **英語名:** Danny Choi", "💎 **宝石:** ガーネット", "🩸 **血液型:** A型", "⚽ **趣味:** サッカー, 買い物", "7️⃣ **好きな数字:** 7"],
+                "cn": ["🦔 **英文名:** Danny Choi", "💎 **宝石:** 石榴石", "🩸 **血型:** A型", "⚽ **爱好:** 足球, 购物", "7️⃣ **幸运数字:** 7"]
             },
             "songs": ["VolKno", "KING KONG"], 
             "covers": ["Humble"]
@@ -976,11 +1314,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "来自釜山，曾梦想成为飞行员。练习4年。T5成员及前队长。"
             },
             "facts": {
-                "th": ["🐯 **English Name:** Jun Park", "✈️ **Dream:** นักบิน", "🔴 **Color:** Red"],
-                "en": ["🐯 **English Name:** Jun Park", "✈️ **Dream:** Pilot", "🔴 **Color:** Red"],
-                "kr": ["🐯 **영어 이름:** Jun Park", "✈️ **꿈:** 파일럿", "🔴 **색깔:** 빨강"],
-                "jp": ["🐯 **英語名:** Jun Park", "✈️ **夢:** パイロット", "🔴 **色:** 赤"],
-                "cn": ["🐯 **英文名:** Jun Park", "✈️ **梦想:** 飞行员", "🔴 **颜色:** 红色"]
+                "th": ["🐶 **English Name:** Jun Park", "💎 **Gemstone:** Amethyst (อเมทิสต์)", "🩸 **Blood Type:** B", "✈️ **Dream:** นักบิน", "🔴 **Color:** Red"],
+                "en": ["🐶 **English Name:** Jun Park", "💎 **Gemstone:** Amethyst", "🩸 **Blood Type:** B", "✈️ **Dream:** Pilot", "🔴 **Color:** Red"],
+                "kr": ["🐶 **영어 이름:** Jun Park", "💎 **보석:** 자수정", "🩸 **혈액형:** B형", "✈️ **꿈:** 파일럿", "🔴 **색깔:** 빨강"],
+                "jp": ["🐶 **英語名:** Jun Park", "💎 **宝石:** アメジスト", "🩸 **血液型:** B型", "✈️ **夢:** パイロット", "🔴 **色:** 赤"],
+                "cn": ["🐶 **英文名:** Jun Park", "💎 **宝石:** 紫水晶", "🩸 **血型:** B型", "✈️ **梦想:** 飞行员", "🔴 **颜色:** 红色"]
             },
             "songs": ["The Way To", "MOVE"], 
             "covers": ["Ko Ko Bop"]
@@ -1002,11 +1340,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "出生于神户的第四代在日韩裔。曾梦想成为赛车手。"
             },
             "facts": {
-                "th": ["🐯 **English Name:** Jaden", "🏎️ **Dream:** นักแข่งรถ", "🎨 **Hobby:** Graffiti"],
-                "en": ["🐯 **English Name:** Jaden", "🏎️ **Dream:** Racer", "🎨 **Hobby:** Graffiti"],
-                "kr": ["🐯 **영어 이름:** Jaden", "🏎️ **꿈:** 레이서", "🎨 **취미:** 그래피티"],
-                "jp": ["🐯 **英語名:** Jaden", "🏎️ **夢:** レーサー", "🎨 **趣味:** グラフィティ"],
-                "cn": ["🐯 **英文名:** Jaden", "🏎️ **梦想:** 赛车手", "🎨 **爱好:** 涂鸦"]
+                "th": ["🐯 **English Name:** Jaden", "💎 **Gemstone:** Aquamarine (อความารีน)", "🩸 **Blood Type:** A", "🏎️ **Dream:** นักแข่งรถ", "🇯🇵 **Origin:** Kobe, Japan"],
+                "en": ["🐯 **English Name:** Jaden", "💎 **Gemstone:** Aquamarine", "🩸 **Blood Type:** A", "🏎️ **Dream:** Racer", "🇯🇵 **Origin:** Kobe, Japan"],
+                "kr": ["🐯 **영어 이름:** Jaden", "💎 **보석:** 아쿠아마린", "🩸 **혈액형:** A형", "🏎️ **꿈:** 레이서", "🇯🇵 **출신:** 일본 고베"],
+                "jp": ["🐯 **英語名:** Jaden", "💎 **宝石:** アクアマリン", "🩸 **血液型:** A型", "🏎️ **夢:** レーサー", "🇯🇵 **出身:** 神戸"],
+                "cn": ["🐯 **英文名:** Jaden", "💎 **宝石:** 海蓝宝", "🩸 **血型:** A型", "🏎️ **梦想:** 赛车手", "🇯🇵 **出身:** 神户"]
             },
             "songs": ["STUPID", "KING KONG"], 
             "covers": ["Still Life"]
@@ -1028,11 +1366,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "前童模。2025年起担任新队长。T5成员。"
             },
             "facts": {
-                "th": ["🐨 **English Name:** David Kim", "🐱 **Pets:** Ruby, Aengdu", "👕 **Physique:** Physical Genius"],
-                "en": ["🐨 **English Name:** David Kim", "🐱 **Pets:** Ruby, Aengdu", "👕 **Physique:** Physical Genius"],
-                "kr": ["🐨 **영어 이름:** David Kim", "🐱 **반려묘:** 루비, 앵두", "👕 **피지컬:** 피지컬 천재"],
-                "jp": ["🐨 **英語名:** David Kim", "🐱 **ペット:** Ruby, Aengdu", "👕 **体格:** フィジカル天才"],
-                "cn": ["🐨 **英文名:** David Kim", "🐱 **宠物:** Ruby, Aengdu", "👕 **身材:** 脸蛋天才"]
+                "th": ["🐨 **English Name:** David Kim", "💎 **Gemstone:** Diamond (เพชร)", "🩸 **Blood Type:** O", "🐱 **Pets:** Ruby, Aengdu", "👕 **Physique:** Physical Genius"],
+                "en": ["🐨 **English Name:** David Kim", "💎 **Gemstone:** Diamond", "🩸 **Blood Type:** O", "🐱 **Pets:** Ruby, Aengdu", "👕 **Physique:** Physical Genius"],
+                "kr": ["🐨 **영어 이름:** David Kim", "💎 **보석:** 다이아몬드", "🩸 **혈액형:** O형", "🐱 **반려묘:** 루비, 앵두", "👕 **피지컬:** 피지컬 천재"],
+                "jp": ["🐨 **英語名:** David Kim", "💎 **宝石:** ダイヤモンド", "🩸 **血液型:** O型", "🐱 **ペット:** Ruby, Aengdu", "👕 **体格:** フィジカル天才"],
+                "cn": ["🐨 **英文名:** David Kim", "💎 **宝石:** 钻石", "🩸 **血型:** O型", "🐱 **宠物:** Ruby, Aengdu", "👕 **身材:** 脸蛋天才"]
             },
             "songs": ["MOVE", "YELLOW"], 
             "covers": ["Latch"]
@@ -1054,11 +1392,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "YG街头星探发掘。T5成员。"
             },
             "facts": {
-                "th": ["🦁 **English Name:** Kevin Yoon", "🤚 **Hand:** Left-handed", "💖 **Charm:** Sweet"],
-                "en": ["🦁 **English Name:** Kevin Yoon", "🤚 **Hand:** Left-handed", "💖 **Charm:** Sweet"],
-                "kr": ["🦁 **영어 이름:** Kevin Yoon", "🤚 **손:** 왼손잡이", "💖 **매력:** 다정함"],
-                "jp": ["🦁 **英語名:** Kevin Yoon", "🤚 **利き手:** 左利き", "💖 **魅力:** 優しい"],
-                "cn": ["🦁 **英文名:** Kevin Yoon", "🤚 **惯用手:** 左手", "💖 **魅力:** 温柔"]
+                "th": ["🦁 **English Name:** Kevin Yoon", "💎 **Gemstone:** Pearl (ไข่มุก)", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "💖 **Charm:** Sweet"],
+                "en": ["🦁 **English Name:** Kevin Yoon", "💎 **Gemstone:** Pearl", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "💖 **Charm:** Sweet"],
+                "kr": ["🦁 **영어 이름:** Kevin Yoon", "💎 **보석:** 진주", "🩸 **혈액형:** O형", "🤚 **손:** 왼손잡이", "💖 **매력:** 다정함"],
+                "jp": ["🦁 **英語名:** Kevin Yoon", "💎 **宝石:** 真珠", "🩸 **血液型:** O型", "🤚 **利き手:** 左利き", "💖 **魅力:** 優しい"],
+                "cn": ["🦁 **英文名:** Kevin Yoon", "💎 **宝石:** 珍珠", "🩸 **血型:** O型", "🤚 **惯用手:** 左手", "💖 **魅力:** 温柔"]
             },
             "songs": ["MOVE", "Wonderland"], 
             "covers": ["Ring Ring"]
@@ -1080,11 +1418,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "来自大阪。名字意为'晨光'。共同队长 (2025)。"
             },
             "facts": {
-                "th": ["🤖 **English Name:** Arthur", "⚽ **Hobby:** Football", "🎨 **Skill:** Art"],
-                "en": ["🤖 **English Name:** Arthur", "⚽ **Hobby:** Football", "🎨 **Skill:** Art"],
-                "kr": ["🤖 **영어 이름:** Arthur", "⚽ **취미:** 축구", "🎨 **특기:** 예술"],
-                "jp": ["🤖 **英語名:** Arthur", "⚽ **趣味:** サッカー", "🎨 **特技:** アート"],
-                "cn": ["🤖 **英文名:** Arthur", "⚽ **爱好:** 足球", "🎨 **特长:** 艺术"]
+                "th": ["🤖 **English Name:** Arthur", "💎 **Gemstone:** Ruby (ทับทิม)", "🩸 **Blood Type:** AB", "⚽ **Hobby:** Football", "🎨 **Skill:** Art"],
+                "en": ["🤖 **English Name:** Arthur", "💎 **Gemstone:** Ruby", "🩸 **Blood Type:** AB", "⚽ **Hobby:** Football", "🎨 **Skill:** Art"],
+                "kr": ["🤖 **영어 이름:** Arthur", "💎 **보석:** 루비", "🩸 **혈액형:** AB형", "⚽ **취미:** 축구", "🎨 **특기:** 예술"],
+                "jp": ["🤖 **英語名:** Arthur", "💎 **宝石:** ルビー", "🩸 **血液型:** AB型", "⚽ **趣味:** サッカー", "🎨 **特技:** アート"],
+                "cn": ["🤖 **英文名:** Arthur", "💎 **宝石:** 红宝石", "🩸 **血型:** AB型", "⚽ **爱好:** 足球", "🎨 **特长:** 艺术"]
             },
             "songs": ["THANK YOU", "CLAP!"], 
             "covers": ["Lay Me Down"]
@@ -1106,11 +1444,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "三年级开始跳舞。T5成员。热爱滑板。"
             },
             "facts": {
-                "th": ["🛹 **English Name:** Sam", "✝️ **Name:** Nicholas (Baptismal)", "🍳 **Skill:** Cooking"],
-                "en": ["🛹 **English Name:** Sam", "✝️ **Name:** Nicholas (Baptismal)", "🍳 **Skill:** Cooking"],
-                "kr": ["🛹 **영어 이름:** Sam", "✝️ **세례명:** 니콜라스", "🍳 **특기:** 요리"],
-                "jp": ["🛹 **英語名:** Sam", "✝️ **洗礼名:** ニコラス", "🍳 **特技:** 料理"],
-                "cn": ["🛹 **英文名:** Sam", "✝️ **洗礼名:** Nicholas", "🍳 **特长:** 烹饪"]
+                "th": ["🐰 **English Name:** Sam", "💎 **Gemstone:** Sapphire (ไพลิน)", "🩸 **Blood Type:** B", "✝️ **Name:** Nicholas", "🍳 **Skill:** Cooking"],
+                "en": ["🐰 **English Name:** Sam", "💎 **Gemstone:** Sapphire", "🩸 **Blood Type:** B", "✝️ **Name:** Nicholas", "🍳 **Skill:** Cooking"],
+                "kr": ["🐰 **영어 이름:** Sam", "💎 **보석:** 사파이어", "🩸 **혈액형:** B형", "✝️ **세례명:** 니콜라스", "🍳 **특기:** 요리"],
+                "jp": ["🐰 **英語名:** Sam", "💎 **宝石:** サファイア", "🩸 **血液型:** B型", "✝️ **洗礼名:** ニコラス", "🍳 **特技:** 料理"],
+                "cn": ["🐰 **英文名:** Sam", "💎 **宝石:** 蓝宝石", "🩸 **血型:** B型", "✝️ **洗礼名:** Nicholas", "🍳 **特长:** 烹饪"]
             },
             "songs": ["WONDERLAND", "MOVE"], 
             "covers": ["Freedom"]
@@ -1132,11 +1470,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "来自福冈。最高 (183.2cm)。门面 & 低音Rapper。"
             },
             "facts": {
-                "th": ["🦋 **English Name:** Travis", "📏 **Height:** 183.2 cm", "📝 **Skill:** Lyrics"],
-                "en": ["🦋 **English Name:** Travis", "📏 **Height:** 183.2 cm", "📝 **Skill:** Lyrics"],
-                "kr": ["🦋 **영어 이름:** Travis", "📏 **신장:** 183.2 cm", "📝 **특기:** 작사"],
-                "jp": ["🦋 **英語名:** Travis", "📏 **身長:** 183.2 cm", "📝 **特技:** 作詞"],
-                "cn": ["🦋 **英文名:** Travis", "📏 **身高:** 183.2 cm", "📝 **特长:** 作词"]
+                "th": ["🦋 **English Name:** Travis", "💎 **Gemstone:** Opal (โอปอล)", "🩸 **Blood Type:** B", "📏 **Height:** 183.2 cm", "🇯🇵 **Origin:** Fukuoka"],
+                "en": ["🦋 **English Name:** Travis", "💎 **Gemstone:** Opal", "🩸 **Blood Type:** B", "📏 **Height:** 183.2 cm", "🇯🇵 **Origin:** Fukuoka"],
+                "kr": ["🦋 **영어 이름:** Travis", "💎 **보석:** 오팔", "🩸 **혈액형:** B형", "📏 **신장:** 183.2 cm", "🇯🇵 **출신:** 후쿠오카"],
+                "jp": ["🦋 **英語名:** Travis", "💎 **宝石:** オパール", "🩸 **血液型:** B型", "📏 **身長:** 183.2 cm", "🇯🇵 **出身:** 福岡"],
+                "cn": ["🦋 **英文名:** Travis", "💎 **宝石:** 蛋白石", "🩸 **血型:** B型", "📏 **身高:** 183.2 cm", "🇯🇵 **出身:** 福冈"]
             },
             "songs": ["G.O.A.T", "KING KONG"], 
             "covers": ["FLASH"]
@@ -1158,11 +1496,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "来自益山。左撇子。毕业于SOPA。"
             },
             "facts": {
-                "th": ["🐺 **English Name:** Justin", "🤚 **Hand:** Left-handed", "🎤 **Role:** Main Vocal"],
-                "en": ["🐺 **English Name:** Justin", "🤚 **Hand:** Left-handed", "🎤 **Role:** Main Vocal"],
-                "kr": ["🐺 **영어 이름:** Justin", "🤚 **손:** 왼손잡이", "🎤 **역할:** 메인보컬"],
-                "jp": ["🐺 **英語名:** Justin", "🤚 **利き手:** 左利き", "🎤 **役割:** メインボーカル"],
-                "cn": ["🐺 **英文名:** Justin", "🤚 **惯用手:** 左手", "🎤 **担当:** 主唱"]
+                "th": ["🐺 **English Name:** Justin", "💎 **Gemstone:** Topaz (โทพาซ)", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "🎤 **Role:** Main Vocal"],
+                "en": ["🐺 **English Name:** Justin", "💎 **Gemstone:** Topaz", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "🎤 **Role:** Main Vocal"],
+                "kr": ["🐺 **영어 이름:** Justin", "💎 **보석:** 토파즈", "🩸 **혈액형:** O형", "🤚 **손:** 왼손잡이", "🎤 **역할:** 메인보컬"],
+                "jp": ["🐺 **英語名:** Justin", "💎 **宝石:** トパーズ", "🩸 **血液型:** O型", "🤚 **利き手:** 左利き", "🎤 **役割:** メインボーカル"],
+                "cn": ["🐺 **英文名:** Justin", "💎 **宝石:** 托帕石", "🩸 **血型:** O型", "🤚 **惯用手:** 左手", "🎤 **担当:** 主唱"]
             },
             "songs": ["PARADISE", "DARARI"], 
             "covers": ["Superstar"]
@@ -1184,11 +1522,11 @@ def get_members_data() -> List[Dict]:
                 "cn": "前K-TIGERS成员。梦想成为跆拳道运动员。喜欢冬天。"
             },
             "facts": {
-                "th": ["🐮 **English Name:** John", "🥋 **Team:** K-TIGERS", "❄️ **Season:** Winter"],
-                "en": ["🐮 **English Name:** John", "🥋 **Team:** K-TIGERS", "❄️ **Season:** Winter"],
-                "kr": ["🐮 **영어 이름:** John", "🥋 **팀:** K-TIGERS", "❄️ **계절:** 겨울"],
-                "jp": ["🐮 **英語名:** John", "🥋 **チーム:** K-TIGERS", "❄️ **季節:** 冬"],
-                "cn": ["🐮 **英文名:** John", "🥋 **队伍:** K-TIGERS", "❄️ **季节:** 冬天"]
+                "th": ["🐮 **English Name:** John", "💎 **Gemstone:** Turquoise (เทอร์ควอยซ์)", "🩸 **Blood Type:** B", "🥋 **Team:** K-TIGERS", "❄️ **Season:** Winter"],
+                "en": ["🐮 **English Name:** John", "💎 **Gemstone:** Turquoise", "🩸 **Blood Type:** B", "🥋 **Team:** K-TIGERS", "❄️ **Season:** Winter"],
+                "kr": ["🐮 **영어 이름:** John", "💎 **보석:** 터키석", "🩸 **혈액형:** B형", "🥋 **팀:** K-TIGERS", "❄️ **계절:** 겨울"],
+                "jp": ["🐮 **英語名:** John", "💎 **宝石:** ターコイズ", "🩸 **血液型:** B型", "🥋 **チーム:** K-TIGERS", "❄️ **季節:** 冬"],
+                "cn": ["🐮 **英文名:** John", "💎 **宝石:** 绿松石", "🩸 **血型:** B型", "🥋 **队伍:** K-TIGERS", "❄️ **季节:** 冬天"]
             },
             "songs": ["B.O.M.B", "MOVE"], 
             "covers": ["Lie"]
@@ -1332,6 +1670,10 @@ def render_sidebar(members: List[Dict], t: Dict, lang: str):
             st.session_state.page = 'about'
             st.rerun()
             
+        if st.button(f"{t.get('menu_cheer', '💬 Fan Zone')}", use_container_width=True, type="primary" if st.session_state.page == 'cheer' else "secondary"):
+            st.session_state.page = 'cheer'
+            st.rerun()
+
         st.markdown("---")
         
         st.markdown(f"<div style='text-align:center; margin-bottom:10px; color:#aaa; font-size:0.9rem;'>{t.get('rec_playlist_1', '🎬 OFFICIAL M/V')}</div>", unsafe_allow_html=True)
@@ -1354,6 +1696,24 @@ def render_sidebar(members: List[Dict], t: Dict, lang: str):
             </div>
         </a>
         """, unsafe_allow_html=True)
+
+        st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
+        
+        # ตรวจสอบสถานะ Admin
+        is_admin_active = st.session_state.get('is_admin_active', False)
+        
+        # จัด Layout ปุ่มให้อยู่ตรงกลางสวยๆ
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            if is_admin_active:
+                # ถ้าล็อกอินแล้ว ปุ่มจะเป็นสีเขียว กดเพื่อ Logout
+                if st.button("🔓 Active", key="btn_admin_logout", type="primary", use_container_width=True, help="Click to Logout"):
+                    st.session_state.is_admin_active = False
+                    st.rerun()
+            else:
+                # ถ้ายังไม่ล็อกอิน ปุ่มจะเป็นรูปกุญแจ กดเพื่อเรียก Modal
+                if st.button("🔐", key="btn_admin_login", use_container_width=True, help="Admin Login"):
+                    admin_login_modal()
 
 # ============================================
 # 🎯 MEMBER GRID RENDERING
@@ -1643,6 +2003,9 @@ def main():
         elif st.session_state.page == 'about':
             render_group_info(t, lang)
         
+        elif st.session_state.page == 'cheer':
+            render_cheer_board(t, members)
+
         # Footer
         st.markdown(f"""
         <div style="text-align:center; margin-top:60px; padding: 25px; border-top: 1px solid rgba(255,255,255,0.1); opacity:0.6; font-size:0.85rem;">
