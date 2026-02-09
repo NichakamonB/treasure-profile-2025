@@ -1573,14 +1573,6 @@ def main():
         
         render_sidebar(members, t, lang)
         
-        # Language Flags
-        c_spacer, c_th, c_en, c_kr, c_jp, c_cn = st.columns([10, 0.7, 0.7, 0.7, 0.7, 0.7])
-        with c_th: st.button("🇹🇭", on_click=set_language, args=("th",), key="f_th")
-        with c_en: st.button("🇬🇧", on_click=set_language, args=("en",), key="f_en")
-        with c_kr: st.button("🇰🇷", on_click=set_language, args=("kr",), key="f_kr")
-        with c_jp: st.button("🇯🇵", on_click=set_language, args=("jp",), key="f_jp")
-        with c_cn: st.button("🇨🇳", on_click=set_language, args=("cn",), key="f_cn")
-        
         # Hero Section
         st.markdown(f"""
         <div class="hero-container">
