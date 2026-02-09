@@ -457,7 +457,8 @@ def get_ui_text() -> Dict:
             "btn_delete": "🗑️ ลบ",
             "btn_save_edit": "💾 บันทึก",
             "btn_cancel": "❌ ยกเลิก",
-            "confirm_delete": "ลบข้อความนี้?"
+            "confirm_delete": "ลบข้อความนี้?",
+            "bio_title": "ชีวประวัติโดยย่อ"
         },
         "en": {
             "sub": "LOVE PULSE : THE 3RD MINI ALBUM | 2026",
@@ -521,7 +522,8 @@ def get_ui_text() -> Dict:
             "btn_delete": "🗑️ Delete",
             "btn_save_edit": "💾 Save",
             "btn_cancel": "❌ Cancel",
-            "confirm_delete": "Delete this?"
+            "confirm_delete": "Delete this?",
+            "bio_title": "Biography"
         },
         "kr": {
             "sub": "LOVE PULSE : 세 번째 미니 앨범 | 2026",
@@ -585,7 +587,8 @@ def get_ui_text() -> Dict:
             "btn_delete": "🗑️ 삭제",
             "btn_save_edit": "💾 저장",
             "btn_cancel": "❌ 취소",
-            "confirm_delete": "삭제하시겠습니까?"
+            "confirm_delete": "삭제하시겠습니까?",
+            "bio_title": "약력"
         },
         "jp": {
             "sub": "LOVE PULSE : サード・ミニアルバム | 2026",
@@ -649,7 +652,8 @@ def get_ui_text() -> Dict:
             "btn_delete": "🗑️ 削除",
             "btn_save_edit": "💾 保存",
             "btn_cancel": "❌ キャンセル",
-            "confirm_delete": "削除しますか？"
+            "confirm_delete": "削除しますか？",
+            "bio_title": "略歴"
         },
         "cn": {
             "sub": "LOVE PULSE : 第三张迷你专辑 | 2026",
@@ -713,7 +717,8 @@ def get_ui_text() -> Dict:
             "btn_delete": "🗑️ 删除",
             "btn_save_edit": "💾 保存",
             "btn_cancel": "❌ 取消",
-            "confirm_delete": "确定删除吗？"
+            "confirm_delete": "确定删除吗？",
+            "bio_title": "传记"
 
         }
     }
@@ -1311,268 +1316,357 @@ def inject_custom_css():
 @st.cache_data
 def get_members_data() -> List[Dict]:
     return [
+        # --- 1. HYUNSUK ---
         {
-            "name": "Hyunsuk", 
+            "name": "Hyunsuk",
             "img": "hyunsuk.jpg",
-            "birthday": "1999.04.21", 
-            "height": "171 cm", 
+            "history_image": "https://i.pinimg.com/736x/8d/95/92/8d959265972f05633725597906967735.jpg",
+            "birthday": "1999.04.21",
+            "height": "171 cm",
             "mbti": "ENFP",
             "display_name": {"th": "ชเว ฮยอนซอก", "en": "Choi Hyunsuk", "kr": "최현석", "jp": "チェ・ヒョンソク", "cn": "崔玹硕"},
-            "position": {"th": "แร็ปเปอร์, แดนซ์", "en": "Rapper, Dancer", "kr": "래퍼, 댄서", "jp": "ラッパー, ダンサー", "cn": "Rapper, 舞担"},
-            "nickname": {"th": "Hedgehog", "en": "Hedgehog", "kr": "칠현석", "jp": "ヒョンソク", "cn": "脆现硕"},
+            "position": {"th": "ลีดเดอร์, แร็ปเปอร์, แดนซ์", "en": "Leader, Rapper, Dancer", "kr": "리더, 래퍼, 댄서", "jp": "リーダー, ラッパー", "cn": "队长, Rapper"},
+            "nickname": {"th": "Ddaeng", "en": "Ddaeng", "kr": "댕", "jp": "デン", "cn": "Ddaeng"},
             "history": {
-                "th": "พี่ใหญ่ของวง เกิดที่คังนัม ได้รับแรงบันดาลใจจาก BIGBANG ผ่านรายการ MIXNINE (อันดับ 5) ปัจจุบันเป็นเสาหลักของวง (Former Leader 2020-2024)",
-                "en": "Eldest member, born in Gangnam. Inspired by BIGBANG. MIXNINE rank 5. Former Leader (2020-2024).",
-                "kr": "강남 출신 맏형. 빅뱅을 보고 꿈을 키움. 믹스나인 5위. 전 리더 (2020-2024).",
-                "jp": "江南出身の最年長。BIGBANGに憧れる。MIXNINE 5位。元リーダー (2020-2024)。",
-                "cn": "出生于江南的大哥。BIGBANG的粉丝。MIXNINE第5名。前队长 (2020-2024)。"
+                "th": "พี่ใหญ่และผู้นำแฟชั่นของวง ผ่านรายการ MIXNINE (อันดับ 5) เป็นเด็กฝึกยาวนานที่สุดในวง",
+                "en": "Eldest member and fashionista. MIXNINE Rank 5. Longest trainee period.",
+                "kr": "팀의 맏형이자 패셔니스타. 믹스나인 5위. 연습생 기간이 가장 길었음.",
+                "jp": "最年長でファッショニスタ。MIXNINE 5位。練習生期間が一番長い。",
+                "cn": "大哥和时尚达人。MIXNINE第5名。练习生时间最长。"
+            },
+            "biography": {
+                "th": "ชเว ฮยอนซอก เข้ามาเป็นเด็กฝึกของ YG ในปี 2015 ผ่านการออดิชั่นแบบส่วนตัว เขาเป็นที่รู้จักครั้งแรกผ่านรายการ MIXNINE ในปี 2017 และได้อันดับที่ 5 ในรอบไฟนอล แต่โชคร้ายที่การเดบิวต์ถูกยกเลิก เขาไม่ย่อท้อและกลับมาแข่งขันในรายการ YG Treasure Box จนได้รับเลือกเป็นสมาชิกคนสุดท้ายของ TREASURE 7 (ไลน์อัพแรก) และกลายเป็นลีดเดอร์ที่พึ่งพาได้ของวงในที่สุด",
+                "en": "Choi Hyunsuk joined YG in 2015 via private audition. Ranked 5th in MIXNINE (2017) but debut was cancelled. Joined YG Treasure Box and became the final member of the first lineup, now leading the group.",
+                "kr": "2015년 입사. 믹스나인 5위를 기록했으나 데뷔 무산. 이후 YG 보석함에서 최종 멤버로 선발되어 리더가 됨.",
+                "jp": "2015年入社。MIXNINEで5位になるもデビュー白紙。YG宝石箱で最終メンバーに選ばれリーダーに。",
+                "cn": "2015年加入YG。MIXNINE获得第5名但出道取消。后通过YG宝石盒成为最终成员并担任队长。"
             },
             "facts": {
-                "th": ["🦔 **English Name:** Danny Choi", "💎 **Gemstone:** Garnet (โกเมน)", "🩸 **Blood Type:** A", "⚽ **Hobby:** ฟุตบอล, ช้อปปิ้ง", "7️⃣ **Fav Number:** 7"],
-                "en": ["🦔 **English Name:** Danny Choi", "💎 **Gemstone:** Garnet", "🩸 **Blood Type:** A", "⚽ **Hobby:** Soccer, Shopping", "7️⃣ **Fav Number:** 7"],
-                "kr": ["🦔 **영어 이름:** Danny Choi", "💎 **보석:** 가넷", "🩸 **혈액형:** A형", "⚽ **취미:** 축구, 쇼핑", "7️⃣ **좋아하는 숫자:** 7"],
-                "jp": ["🦔 **英語名:** Danny Choi", "💎 **宝石:** ガーネット", "🩸 **血液型:** A型", "⚽ **趣味:** サッカー, 買い物", "7️⃣ **好きな数字:** 7"],
-                "cn": ["🦔 **英文名:** Danny Choi", "💎 **宝石:** 石榴石", "🩸 **血型:** A型", "⚽ **爱好:** 足球, 购物", "7️⃣ **幸运数字:** 7"]
+                "th": ["🩸 **Blood Type:** A", "💎 **Gemstone:** Garnet", "🐶 **Eng Name:** Danny Choi", "⚽ **Hobby:** ช้อปปิ้ง, ฟุตบอล", "🎵 **Role:** Composer"],
+                "en": ["🩸 **Blood Type:** A", "💎 **Gemstone:** Garnet", "🐶 **Eng Name:** Danny Choi", "⚽ **Hobby:** Shopping, Soccer", "🎵 **Role:** Composer"],
+                "kr": ["🩸 **혈액형:** A형", "💎 **보석:** 가넷", "🐶 **영어 이름:** Danny Choi", "⚽ **취미:** 쇼핑, 축구", "🎵 **역할:** 작곡"],
+                "jp": ["🩸 **血液型:** A型", "💎 **宝石:** ガーネット", "🐶 **英語名:** Danny Choi", "⚽ **趣味:** 買い物", "🎵 **役割:** 作曲"],
+                "cn": ["🩸 **血型:** A型", "💎 **宝石:** 石榴石", "🐶 **英文名:** Danny Choi", "⚽ **爱好:** 购物", "🎵 **担当:** 作曲"]
             },
-            "songs": ["VolKno", "KING KONG"], 
+            "songs": ["VolKno", "Wonderland"],
             "covers": ["Humble"]
         },
+        # --- 2. JIHOON ---
         {
-            "name": "Jihoon", 
+            "name": "Jihoon",
             "img": "jihoon.jpg",
-            "birthday": "2000.03.14", 
-            "height": "178 cm", 
+            "history_image": "",
+            "birthday": "2000.03.14",
+            "height": "178 cm",
             "mbti": "ENTJ",
             "display_name": {"th": "พัค จีฮุน", "en": "Park Jihoon", "kr": "박지훈", "jp": "パク・ジフン", "cn": "朴志焄"},
-            "position": {"th": "เมนแดนซ์, T5", "en": "Main Dancer, T5", "kr": "메인 댄서, T5", "jp": "メインダンサー, T5", "cn": "主舞, T5"},
+            "position": {"th": "ลีดเดอร์, เมนแดนซ์, โวคอล", "en": "Leader, Main Dancer, Vocal", "kr": "리더, 메인 댄서, 보컬", "jp": "リーダー, メインダンサー", "cn": "队长, 主舞"},
             "nickname": {"th": "Hoonie", "en": "Hoonie", "kr": "후니", "jp": "フニ", "cn": "Hoonie"},
-            "history": { 
-                "th": "จากปูซาน เคยฝันอยากเป็นนักบิน ฝึกมา 4 ปี เป็นสมาชิกยูนิต T5 และอดีตลีดเดอร์ (2020-2024)",
-                "en": "From Busan, dreamed of being a pilot. Trained 4 years. Member of T5 and former Leader (2020-2024).",
-                "kr": "부산 출신, 파일럿이 꿈이었음. 4년 연습. T5 멤버이자 전 리더.",
-                "jp": "釜山出身、パイロットが夢だった。練習生4年。T5メンバーで元リーダー。",
-                "cn": "来自釜山，曾梦想成为飞行员。练习4年。T5成员及前队长。"
+            "history": {
+                "th": "จากปูซาน เคยออกจาก YG แล้วกลับมาใหม่ผ่านรายการ Treasure Box เป็นคนที่มีความเป็นผู้นำสูง",
+                "en": "From Busan. Left YG once but returned for Treasure Box. High leadership skills.",
+                "kr": "부산 출신. YG 퇴사 후 보석함으로 복귀. 리더십이 강함.",
+                "jp": "釜山出身。一度YGを去ったが宝石箱で復帰。リーダーシップが強い。",
+                "cn": "来自釜山。曾离开YG后回归。领导力强。"
+            },
+            "biography": {
+                "th": "จีฮุนเข้ามาเป็นเด็กฝึกในปี 2016 แต่ต้องออกจาก YG ไปช่วงหนึ่ง เขาไม่ละทิ้งความฝันและกลับมาท้าทายอีกครั้งในรายการ YG Treasure Box ด้วยทักษะการเต้นที่พัฒนาขึ้นอย่างก้าวกระโดดและความเป็นผู้นำที่โดดเด่น ทำให้เขาได้รับเลือกให้เดบิวต์และเป็นลีดเดอร์คู่กับฮยอนซอก",
+                "en": "Jihoon joined in 2016 but left shortly after. He returned for YG Treasure Box with improved skills, earning his spot and co-leader role.",
+                "kr": "2016년 입사 후 퇴사했으나, 보석함으로 재도전하여 향상된 실력으로 데뷔 및 공동 리더 발탁.",
+                "jp": "2016年に入社したが退社。宝石箱で再挑戦し、実力を証明してデビューと共同リーダーの座を掴んだ。",
+                "cn": "2016年加入后曾退出。通过宝石盒回归，凭借实力出道并成为共同队长。"
             },
             "facts": {
-                "th": ["🐶 **English Name:** Jun Park", "💎 **Gemstone:** Amethyst (อเมทิสต์)", "🩸 **Blood Type:** B", "✈️ **Dream:** นักบิน", "🔴 **Color:** Red"],
-                "en": ["🐶 **English Name:** Jun Park", "💎 **Gemstone:** Amethyst", "🩸 **Blood Type:** B", "✈️ **Dream:** Pilot", "🔴 **Color:** Red"],
-                "kr": ["🐶 **영어 이름:** Jun Park", "💎 **보석:** 자수정", "🩸 **혈액형:** B형", "✈️ **꿈:** 파일럿", "🔴 **색깔:** 빨강"],
-                "jp": ["🐶 **英語名:** Jun Park", "💎 **宝石:** アメジスト", "🩸 **血液型:** B型", "✈️ **夢:** パイロット", "🔴 **色:** 赤"],
-                "cn": ["🐶 **英文名:** Jun Park", "💎 **宝石:** 紫水晶", "🩸 **血型:** B型", "✈️ **梦想:** 飞行员", "🔴 **颜色:** 红色"]
+                "th": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Amethyst", "🐶 **Eng Name:** Jun Park", "💪 **Skill:** Pilates", "📷 **Hobby:** ถ่ายรูป"],
+                "en": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Amethyst", "🐶 **Eng Name:** Jun Park", "💪 **Skill:** Pilates", "📷 **Hobby:** Photography"],
+                "kr": ["🩸 **혈액형:** B형", "💎 **보석:** 자수정", "🐶 **영어 이름:** Jun Park", "💪 **특기:** 필라테스", "📷 **취미:** 사진"],
+                "jp": ["🩸 **血液型:** B型", "💎 **宝石:** アメジスト", "🐶 **英語名:** Jun Park", "💪 **特技:** ピラティス", "📷 **趣味:** 写真"],
+                "cn": ["🩸 **血型:** B型", "💎 **宝石:** 紫水晶", "🐶 **英文名:** Jun Park", "💪 **特长:** 普拉提", "📷 **爱好:** 摄影"]
             },
-            "songs": ["The Way To", "MOVE"], 
-            "covers": ["Ko Ko Bop"]
+            "songs": ["The Way To", "HOLD IT IN"],
+            "covers": ["Song Request"]
         },
+        # --- 3. YOSHI ---
         {
-            "name": "Yoshi", 
+            "name": "Yoshi",
             "img": "yoshi.jpg",
-            "birthday": "2000.05.15", 
-            "height": "179 cm", 
+            "history_image": "",
+            "birthday": "2000.05.15",
+            "height": "179 cm",
             "mbti": "INFP",
             "display_name": {"th": "คาเนโมโตะ โยชิโนริ", "en": "Kanemoto Yoshinori", "kr": "요시노리", "jp": "金本芳典", "cn": "金本芳典"},
-            "position": {"th": "เมนแร็ปเปอร์", "en": "Main Rapper", "kr": "메인 래퍼", "jp": "メインラッパー", "cn": "主Rapper"},
-            "nickname": {"th": "Dark Horse", "en": "Dark Horse", "kr": "다크호스", "jp": "ダークホース", "cn": "黑马"},
+            "position": {"th": "แร็ปเปอร์", "en": "Rapper", "kr": "래퍼", "jp": "ラッパー", "cn": "Rapper"},
+            "nickname": {"th": "Tiger", "en": "Tiger", "kr": "호랑이", "jp": "トラ", "cn": "老虎"},
             "history": {
-                "th": "เกิดที่โกเบ ญี่ปุ่น เป็นลูกครึ่งเกาหลี-ญี่ปุ่น รุ่นที่ 4 (Zainichi) ฝันอยากเป็นนักแข่งรถ",
-                "en": "Born in Kobe, 4th gen Zainichi Korean. Dreamed of being a racer.",
-                "kr": "고베 출신 재일교포 4세. 레이서가 꿈이었음.",
-                "jp": "神戸出身の在日韓国人4世。レーサーになるのが夢だった。",
-                "cn": "出生于神户的第四代在日韩裔。曾梦想成为赛车手。"
+                "th": "เกิดที่โกเบ แฟชั่นนิสต้าที่รักศิลปะ เคยฝันอยากเป็นนักแข่งรถ มีสไตล์แร็ปเสียงสูง (High tone)",
+                "en": "Born in Kobe. Fashionista loving art. Dreamed of racing. Known for high-tone rap.",
+                "kr": "고베 출신. 예술을 사랑하는 패셔니스타. 하이톤 랩이 특징.",
+                "jp": "神戸出身。アート好きのファッショニスタ。ハイトーンラップが特徴。",
+                "cn": "生于神户。热爱艺术的时尚达人。以高音Rapper著称。"
+            },
+            "biography": {
+                "th": "โยชิเกิดและโตที่ญี่ปุ่น เขาผ่านการออดิชั่นของ YG Japan แม้จะสูญเสียคุณพ่อไปตั้งแต่เด็ก แต่เขาก็มุ่งมั่นทำตามความฝันเพื่อครอบครัว ในรายการ Treasure Box เขาแสดงให้เห็นถึงพัฒนาการที่ก้าวกระโดดจนได้รับเลือกเข้าสู่ทีม Magnum (ยูนิตที่ 2) ก่อนจะรวมเป็น TREASURE",
+                "en": "Born in Japan, passed YG Japan audition. Despite losing his father young, he pursued his dream for his family. Selected for Magnum in Treasure Box before merging into TREASURE.",
+                "kr": "일본 출신으로 YG Japan 오디션 합격. 어린 시절 아버지를 여의었으나 꿈을 포기하지 않음. 매그넘 멤버로 선발됨.",
+                "jp": "日本出身、YG Japanオーディション合格。幼い頃に父を亡くすが夢を追う。マグナムのメンバーとして選ばれた。",
+                "cn": "生于日本，通过YG Japan选秀。虽早年丧父但坚持梦想。入选Magnum成员。"
             },
             "facts": {
-                "th": ["🐯 **English Name:** Jaden", "💎 **Gemstone:** Aquamarine (อความารีน)", "🩸 **Blood Type:** A", "🏎️ **Dream:** นักแข่งรถ", "🇯🇵 **Origin:** Kobe, Japan"],
-                "en": ["🐯 **English Name:** Jaden", "💎 **Gemstone:** Aquamarine", "🩸 **Blood Type:** A", "🏎️ **Dream:** Racer", "🇯🇵 **Origin:** Kobe, Japan"],
-                "kr": ["🐯 **영어 이름:** Jaden", "💎 **보석:** 아쿠아마린", "🩸 **혈액형:** A형", "🏎️ **꿈:** 레이서", "🇯🇵 **출신:** 일본 고베"],
-                "jp": ["🐯 **英語名:** Jaden", "💎 **宝石:** アクアマリン", "🩸 **血液型:** A型", "🏎️ **夢:** レーサー", "🇯🇵 **出身:** 神戸"],
-                "cn": ["🐯 **英文名:** Jaden", "💎 **宝石:** 海蓝宝", "🩸 **血型:** A型", "🏎️ **梦想:** 赛车手", "🇯🇵 **出身:** 神户"]
+                "th": ["🩸 **Blood Type:** A", "💎 **Gemstone:** Aquamarine", "🐶 **Eng Name:** Jaden", "🎸 **Hobby:** กีตาร์", "🥋 **Skill:** Beatbox"],
+                "en": ["🩸 **Blood Type:** A", "💎 **Gemstone:** Aquamarine", "🐶 **Eng Name:** Jaden", "🎸 **Hobby:** Guitar", "🥋 **Skill:** Beatbox"],
+                "kr": ["🩸 **혈액형:** A형", "💎 **보석:** 아쿠아마린", "🐶 **영어 이름:** Jaden", "🎸 **취미:** 기타", "🥋 **특기:** 비트박스"],
+                "jp": ["🩸 **血液型:** A型", "💎 **宝石:** アクアマリン", "🐶 **英語名:** Jaden", "🎸 **趣味:** ギター", "🥋 **特技:** ビートボックス"],
+                "cn": ["🩸 **血型:** A型", "💎 **宝石:** 海蓝宝", "🐶 **英文名:** Jaden", "🎸 **爱好:** 吉他", "🥋 **特长:** Beatbox"]
             },
-            "songs": ["STUPID", "KING KONG"], 
+            "songs": ["STUPID", "JIKJIN"],
             "covers": ["Still Life"]
         },
+        # --- 4. JUNKYU ---
         {
-            "name": "Junkyu", 
+            "name": "Junkyu",
             "img": "junkyu.jpg",
-            "birthday": "2000.09.09", 
-            "height": "178 cm", 
+            "history_image": "",
+            "birthday": "2000.09.09",
+            "height": "178 cm",
             "mbti": "INFJ",
             "display_name": {"th": "คิม จุนกยู", "en": "Kim Junkyu", "kr": "김준규", "jp": "キム・ジュンギュ", "cn": "金俊奎"},
-            "position": {"th": "ลีดเดอร์ (2025+), T5", "en": "Leader (2025+), T5", "kr": "리더 (2025+), T5", "jp": "リーダー (2025+), T5", "cn": "队长 (2025+), T5"},
-            "nickname": {"th": "Handsome Koala", "en": "Handsome Koala", "kr": "코알라", "jp": "コアラ", "cn": "帅气考拉"},
+            "position": {"th": "โวคอล, วิชวล", "en": "Vocalist, Visual", "kr": "보컬, 비주얼", "jp": "ボーカル, ビジュアル", "cn": "主唱, 门面"},
+            "nickname": {"th": "Koala", "en": "Koala", "kr": "코알라", "jp": "コアラ", "cn": "考拉"},
             "history": {
-                "th": "อดีตนายแบบเด็ก รับตำแหน่ง Leader ใหม่ตั้งแต่ปี 2025 เป็นสมาชิกยูนิต T5",
-                "en": "Former child model. New Leader since 2025. T5 Member.",
-                "kr": "아역 모델 출신. 2025년부터 새 리더. T5 멤버.",
-                "jp": "元子役モデル。2025年から新リーダー。T5メンバー。",
-                "cn": "前童模。2025年起担任新队长。T5成员。"
+                "th": "อดีตนายแบบเด็ก ฉายา 'Physical Genius' เสียงร้องเป็นเอกลักษณ์ (YG Style) บุคลิกขี้เล่น",
+                "en": "Former child model. 'Physical Genius'. Unique YG-style vocals. Playful.",
+                "kr": "아역 모델 출신. '피지컬 천재'. 독특한 YG 스타일 보컬. 장난기 많음.",
+                "jp": "元子役。「フィジカル天才」。ユニークなYGボイス。遊び心がある。",
+                "cn": "前童模。'脸蛋天才'。独特的YG嗓音。性格顽皮。"
+            },
+            "biography": {
+                "th": "จุนกยูเข้า YG ในปี 2013 เคยเข้าร่วมรายการ MIXNINE แต่ตกรอบ ซึ่งทำให้เขาสูญเสียความมั่นใจ แต่ในรายการ YG Treasure Box เขาได้ก้าวข้ามขีดจำกัดของตัวเองและพิสูจน์ฝีมือจนกลายเป็นหนึ่งในสมาชิกที่ได้รับความนิยมสูงสุดและได้เดบิวต์เป็นคนแรกๆ",
+                "en": "Joined YG in 2013. Lost confidence after MIXNINE elimination but regained it in Treasure Box, becoming a top member and debuting early.",
+                "kr": "2013년 입사. 믹스나인 탈락으로 위축되었으나 보석함에서 극복하고 인기 멤버로 등극.",
+                "jp": "2013年入社。MIXNINE脱落で自信を失うも宝石箱で克服し、人気メンバーとしてデビュー。",
+                "cn": "2013年加入。虽在MIXNINE淘汰但在宝石盒中重拾自信，成为人气成员。"
             },
             "facts": {
-                "th": ["🐨 **English Name:** David Kim", "💎 **Gemstone:** Diamond (เพชร)", "🩸 **Blood Type:** O", "🐱 **Pets:** Ruby, Aengdu", "👕 **Physique:** Physical Genius"],
-                "en": ["🐨 **English Name:** David Kim", "💎 **Gemstone:** Diamond", "🩸 **Blood Type:** O", "🐱 **Pets:** Ruby, Aengdu", "👕 **Physique:** Physical Genius"],
-                "kr": ["🐨 **영어 이름:** David Kim", "💎 **보석:** 다이아몬드", "🩸 **혈액형:** O형", "🐱 **반려묘:** 루비, 앵두", "👕 **피지컬:** 피지컬 천재"],
-                "jp": ["🐨 **英語名:** David Kim", "💎 **宝石:** ダイヤモンド", "🩸 **血液型:** O型", "🐱 **ペット:** Ruby, Aengdu", "👕 **体格:** フィジカル天才"],
-                "cn": ["🐨 **英文名:** David Kim", "💎 **宝石:** 钻石", "🩸 **血型:** O型", "🐱 **宠物:** Ruby, Aengdu", "👕 **身材:** 脸蛋天才"]
+                "th": ["🩸 **Blood Type:** O", "💎 **Gemstone:** Diamond", "🐶 **Eng Name:** David", "🎹 **Skill:** Piano", "🐱 **Cats:** Ruby, Aengdu"],
+                "en": ["🩸 **Blood Type:** O", "💎 **Gemstone:** Diamond", "🐶 **Eng Name:** David", "🎹 **Skill:** Piano", "🐱 **Cats:** Ruby, Aengdu"],
+                "kr": ["🩸 **혈액형:** O형", "💎 **보석:** 다이아몬드", "🐶 **영어 이름:** David", "🎹 **특기:** 피아노", "🐱 **반려묘:** 루비, 앵두"],
+                "jp": ["🩸 **血液型:** O型", "💎 **宝石:** ダイヤモンド", "🐶 **英語名:** David", "🎹 **特技:** ピアノ", "🐱 **猫:** ルビー, エンドゥ"],
+                "cn": ["🩸 **血型:** O型", "💎 **宝石:** 钻石", "🐶 **英文名:** David", "🎹 **特长:** 钢琴", "🐱 **宠物:** Ruby, Aengdu"]
             },
-            "songs": ["MOVE", "YELLOW"], 
+            "songs": ["MOVE", "I WANT YOUR LOVE"],
             "covers": ["Latch"]
         },
+        # --- 5. JAEHYUK ---
         {
-            "name": "Jaehyuk", 
+            "name": "Jaehyuk",
             "img": "jaehyuk.jpg",
-            "birthday": "2001.07.23", 
-            "height": "178 cm", 
+            "history_image": "",
+            "birthday": "2001.07.23",
+            "height": "178 cm",
             "mbti": "INFP",
             "display_name": {"th": "ยุน แจฮยอก", "en": "Yoon Jaehyuk", "kr": "윤재혁", "jp": "ユン・ジェヒョク", "cn": "尹材赫"},
-            "position": {"th": "โวคอล, T5", "en": "Vocalist, T5", "kr": "보컬, T5", "jp": "ボーカル, T5", "cn": "副主唱, T5"},
+            "position": {"th": "โวคอล", "en": "Vocalist", "kr": "보컬", "jp": "ボーカル", "cn": "副主唱"},
             "nickname": {"th": "Chow Chow", "en": "Chow Chow", "kr": "윤다정", "jp": "ジェヒョク", "cn": "尹多情"},
             "history": {
-                "th": "ถูกแมวมองจาก YG ทาบทามข้างถนน สมาชิก T5",
-                "en": "Street-casted by YG. Member of T5.",
-                "kr": "YG 길거리 캐스팅. T5 멤버.",
-                "jp": "YGにスカウトされた。T5メンバー。",
-                "cn": "YG街头星探发掘。T5成员。"
+                "th": "ถูกแมวมองจากค่ายใหญ่ทาบทามข้างถนน! เป็นคนอบอุ่น พัฒนาตัวเองอย่างหนักจนได้เดบิวต์",
+                "en": "Street-casted by major agencies! Warm personality. Worked hard to debut.",
+                "kr": "대형 기획사 길거리 캐스팅! 따뜻한 성격. 노력으로 데뷔 성공.",
+                "jp": "大手事務所にスカウトされた！温かい性格。努力でデビューを掴んだ。",
+                "cn": "被大社街头星探发掘！性格温暖。努力出道。"
+            },
+            "biography": {
+                "th": "แจฮยอกถูกแคสติ้งข้างถนนโดย YG (และค่ายใหญ่อื่นๆ) เขาฝึกได้ไม่นานก่อนเข้าร่วม Treasure Box ทำให้ช่วงแรกตามคนอื่นไม่ทัน แต่ด้วยความพยายามที่ไม่ยอมแพ้ เขาพัฒนาตัวเองอย่างรวดเร็วจนประธาน YG ประทับใจและเลือกให้เป็นสมาชิกของ TREASURE ในที่สุด",
+                "en": "Street-casted by YG. Had short training before Treasure Box but improved rapidly through sheer effort, impressing YG to select him.",
+                "kr": "YG 길거리 캐스팅. 짧은 연습 기간에도 불구하고 엄청난 노력으로 급성장하여 데뷔 멤버로 발탁됨.",
+                "jp": "YGにスカウト。練習期間は短かったが、猛烈な努力で急成長し、デビューメンバーに選ばれた。",
+                "cn": "YG街头星探发掘。练习时间虽短，但凭借巨大努力飞速进步，最终入选。"
             },
             "facts": {
-                "th": ["🦁 **English Name:** Kevin Yoon", "💎 **Gemstone:** Pearl (ไข่มุก)", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "💖 **Charm:** Sweet"],
-                "en": ["🦁 **English Name:** Kevin Yoon", "💎 **Gemstone:** Pearl", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "💖 **Charm:** Sweet"],
-                "kr": ["🦁 **영어 이름:** Kevin Yoon", "💎 **보석:** 진주", "🩸 **혈액형:** O형", "🤚 **손:** 왼손잡이", "💖 **매력:** 다정함"],
-                "jp": ["🦁 **英語名:** Kevin Yoon", "💎 **宝石:** 真珠", "🩸 **血液型:** O型", "🤚 **利き手:** 左利き", "💖 **魅力:** 優しい"],
-                "cn": ["🦁 **英文名:** Kevin Yoon", "💎 **宝石:** 珍珠", "🩸 **血型:** O型", "🤚 **惯用手:** 左手", "💖 **魅力:** 温柔"]
+                "th": ["🩸 **Blood Type:** O", "💎 **Gemstone:** Pearl", "🐶 **Eng Name:** Kevin", "🤚 **Hand:** Left-handed", "💍 **Charm:** Ring Ring"],
+                "en": ["🩸 **Blood Type:** O", "💎 **Gemstone:** Pearl", "🐶 **Eng Name:** Kevin", "🤚 **Hand:** Left-handed", "💍 **Charm:** Ring Ring"],
+                "kr": ["🩸 **혈액형:** O형", "💎 **보석:** 진주", "🐶 **영어 이름:** Kevin", "🤚 **손:** 왼손잡이", "💍 **매력:** 링링"],
+                "jp": ["🩸 **血液型:** O型", "💎 **宝石:** 真珠", "🐶 **英語名:** Kevin", "🤚 **利き手:** 左利き", "💍 **魅力:** Ring Ring"],
+                "cn": ["🩸 **血型:** O型", "💎 **宝石:** 珍珠", "🐶 **英文名:** Kevin", "🤚 **惯用手:** 左手", "💍 **魅力:** Ring Ring"]
             },
-            "songs": ["MOVE", "Wonderland"], 
+            "songs": ["HELLO", "CLAP!"],
             "covers": ["Ring Ring"]
         },
+        # --- 6. ASAHI ---
         {
-            "name": "Asahi", 
+            "name": "Asahi",
             "img": "asahi.jpg",
-            "birthday": "2001.08.20", 
-            "height": "172 cm", 
+            "history_image": "",
+            "birthday": "2001.08.20",
+            "height": "172 cm",
             "mbti": "INFP",
             "display_name": {"th": "ฮามาดะ อาซาฮิ", "en": "Hamada Asahi", "kr": "하마다 아사히", "jp": "浜田朝光", "cn": "滨田朝光"},
-            "position": {"th": "ลีดเดอร์ (2025+), T5", "en": "Leader (2025+), T5", "kr": "리더 (2025+), T5", "jp": "リーダー (2025+), T5", "cn": "队长 (2025+), T5"},
+            "position": {"th": "โวคอล, วิชวล", "en": "Vocalist, Visual", "kr": "보컬, 비주얼", "jp": "ボーカル, ビジュアル", "cn": "副主唱, 门面"},
             "nickname": {"th": "Robot", "en": "Robot", "kr": "로봇", "jp": "ロボット", "cn": "机器人"},
             "history": {
-                "th": "จากโอซาก้า ชื่อแปลว่า 'แสงยามเช้า' รับตำแหน่ง Leader คู่กับจุนกยู (2025)",
-                "en": "From Osaka. Name means 'Morning Sunshine'. Co-Leader (2025).",
-                "kr": "오사카 출신. 이름 뜻은 '아침 햇살'. 공동 리더 (2025).",
-                "jp": "大阪出身。名前の意味は「朝の光」。共同リーダー (2025)。",
-                "cn": "来自大阪。名字意为'晨光'。共同队长 (2025)。"
+                "th": "จากโอซาก้า มีโลกส่วนตัวสูงและอารมณ์ขันหน้าตาย (4D) เก่งศิลปะและแต่งเพลง (Orange, Thank You)",
+                "en": "From Osaka. 4D personality. Talented in art/composing (Orange, Thank You).",
+                "kr": "오사카 출신. 4차원 성격. 예술과 작곡 능력 보유 (오렌지, 땡큐).",
+                "jp": "大阪出身。4次元な性格。アートと作曲の才能（オレンジ、Thank You）。",
+                "cn": "来自大阪。四次元性格。擅长艺术和作曲（Orange, Thank You）。"
+            },
+            "biography": {
+                "th": "อาซาฮิเข้าร่วม YG ในปี 2018 เขาเป็นคนเงียบๆ ในรายการ Treasure Box แต่ฉายแววความสามารถด้านการแต่งเพลงและศิลปะ เขาเป็นสมาชิกคนสุดท้ายที่ถูกประกาศชื่อในยูนิต Magnum ก่อนจะรวมเป็น TREASURE",
+                "en": "Joined YG in 2018. Quiet in Treasure Box but showed composing/art talent. Final member announced for Magnum before merger.",
+                "kr": "2018년 입사. 조용하지만 작곡과 예술에 재능을 보임. 매그넘의 마지막 멤버로 발표됨.",
+                "jp": "2018年入社。静かだが作曲とアートの才能を発揮。マグナムの最後のメンバーとして発表された。",
+                "cn": "2018年加入。虽然安静但展现了作曲和艺术天赋。Magnum最后公布的成员。"
             },
             "facts": {
-                "th": ["🤖 **English Name:** Arthur", "💎 **Gemstone:** Ruby (ทับทิม)", "🩸 **Blood Type:** AB", "⚽ **Hobby:** Football", "🎨 **Skill:** Art"],
-                "en": ["🤖 **English Name:** Arthur", "💎 **Gemstone:** Ruby", "🩸 **Blood Type:** AB", "⚽ **Hobby:** Football", "🎨 **Skill:** Art"],
-                "kr": ["🤖 **영어 이름:** Arthur", "💎 **보석:** 루비", "🩸 **혈액형:** AB형", "⚽ **취미:** 축구", "🎨 **특기:** 예술"],
-                "jp": ["🤖 **英語名:** Arthur", "💎 **宝石:** ルビー", "🩸 **血液型:** AB型", "⚽ **趣味:** サッカー", "🎨 **特技:** アート"],
-                "cn": ["🤖 **英文名:** Arthur", "💎 **宝石:** 红宝石", "🩸 **血型:** AB型", "⚽ **爱好:** 足球", "🎨 **特长:** 艺术"]
+                "th": ["🩸 **Blood Type:** AB", "💎 **Gemstone:** Ruby", "🐶 **Eng Name:** Arthur", "🎨 **Hobby:** Drawing", "⚽ **Sport:** Football"],
+                "en": ["🩸 **Blood Type:** AB", "💎 **Gemstone:** Ruby", "🐶 **Eng Name:** Arthur", "🎨 **Hobby:** Drawing", "⚽ **Sport:** Football"],
+                "kr": ["🩸 **혈액형:** AB형", "💎 **보석:** 루비", "🐶 **영어 이름:** Arthur", "🎨 **취미:** 그림", "⚽ **운동:** 축구"],
+                "jp": ["🩸 **血液型:** AB型", "💎 **宝石:** ルビー", "🐶 **英語名:** Arthur", "🎨 **趣味:** 絵画", "⚽ **スポーツ:** サッカー"],
+                "cn": ["🩸 **血型:** AB型", "💎 **宝石:** 红宝石", "🐶 **英文名:** Arthur", "🎨 **爱好:** 绘画", "⚽ **运动:** 足球"]
             },
-            "songs": ["THANK YOU", "CLAP!"], 
+            "songs": ["ORANGE", "THANK YOU"],
             "covers": ["Lay Me Down"]
         },
+        # --- 7. DOYOUNG ---
         {
-            "name": "Doyoung", 
+            "name": "Doyoung",
             "img": "doyoung.jpg",
-            "birthday": "2003.12.04", 
-            "height": "177 cm", 
+            "history_image": "",
+            "birthday": "2003.12.04",
+            "height": "177 cm",
             "mbti": "ESTP",
             "display_name": {"th": "คิม โดยอง", "en": "Kim Doyoung", "kr": "김도영", "jp": "キム・ドヨン", "cn": "金道荣"},
-            "position": {"th": "เมนแดนซ์, T5", "en": "Main Dancer, T5", "kr": "메인 댄서, T5", "jp": "メインダンサー, T5", "cn": "主舞, T5"},
+            "position": {"th": "เมนแดนซ์, โวคอล", "en": "Main Dancer, Vocalist", "kr": "메인 댄서, 보컬", "jp": "メインダンサー, ボーカル", "cn": "主舞, 副主唱"},
             "nickname": {"th": "Dobby", "en": "Dobby", "kr": "도비", "jp": "ドビ", "cn": "Dobby"},
             "history": {
-                "th": "เริ่มเต้นตั้งแต่ ป.3 สมาชิก T5 และมีความสามารถด้านสเก็ตบอร์ด",
-                "en": "Started dancing in 3rd grade. T5 Member. Loves skateboarding.",
-                "kr": "초3 때 춤 시작. T5 멤버. 스케이트보드 매니아.",
-                "jp": "小3からダンスを始める。T5メンバー。スケボー好き。",
-                "cn": "三年级开始跳舞。T5成员。热爱滑板。"
+                "th": "เข้า YG ตอนอายุ 11 ปี เป็นแฟชั่นนิสต้า ทักษะการเต้นเฉียบคมและไลน์เต้นสวยงาม",
+                "en": "Joined YG at 11. Fashionista. Sharp and beautiful dance lines.",
+                "kr": "11세에 YG 입사. 패셔니스타. 춤선이 예쁘고 정확함.",
+                "jp": "11歳でYG入社。ファッショニスタ。ダンスのラインが美しい。",
+                "cn": "11岁加入YG。时尚达人。舞蹈线条优美。"
+            },
+            "biography": {
+                "th": "โดยองเริ่มฝึกเต้นมาตั้งแต่เด็กและเข้า YG ตั้งแต่อายุ 11 ปี เขาฝึกพร้อมกับจุนกยูมาอย่างยาวนาน ในรายการ Treasure Box เขาเกือบไม่ได้เดบิวต์แต่ด้วยความสามารถที่โดดเด่นทำให้เขาได้รับโอกาสในยูนิต Magnum",
+                "en": "Started dancing young, joined YG at 11. Trained long with Junkyu. Almost didn't debut but his skills earned him a spot in Magnum.",
+                "kr": "어릴 때부터 춤을 췄고 11세에 입사. 준규와 오랜 연습. 탈락 위기였으나 실력으로 매그넘 합류.",
+                "jp": "幼少期からダンスを始め11歳で入社。ジュンギュと長く練習。脱落の危機を実力で乗り越えマグナムへ。",
+                "cn": "从小跳舞，11岁加入。与俊奎一起练习很久。凭实力入选Magnum。"
             },
             "facts": {
-                "th": ["🐰 **English Name:** Sam", "💎 **Gemstone:** Sapphire (ไพลิน)", "🩸 **Blood Type:** B", "✝️ **Name:** Nicholas", "🍳 **Skill:** Cooking"],
-                "en": ["🐰 **English Name:** Sam", "💎 **Gemstone:** Sapphire", "🩸 **Blood Type:** B", "✝️ **Name:** Nicholas", "🍳 **Skill:** Cooking"],
-                "kr": ["🐰 **영어 이름:** Sam", "💎 **보석:** 사파이어", "🩸 **혈액형:** B형", "✝️ **세례명:** 니콜라스", "🍳 **특기:** 요리"],
-                "jp": ["🐰 **英語名:** Sam", "💎 **宝石:** サファイア", "🩸 **血液型:** B型", "✝️ **洗礼名:** ニコラス", "🍳 **特技:** 料理"],
-                "cn": ["🐰 **英文名:** Sam", "💎 **宝石:** 蓝宝石", "🩸 **血型:** B型", "✝️ **洗礼名:** Nicholas", "🍳 **特长:** 烹饪"]
+                "th": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Sapphire", "🐶 **Eng Name:** Sam", "🛹 **Hobby:** Skateboarding", "🍳 **Skill:** Cooking"],
+                "en": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Sapphire", "🐶 **Eng Name:** Sam", "🛹 **Hobby:** Skateboarding", "🍳 **Skill:** Cooking"],
+                "kr": ["🩸 **혈액형:** B형", "💎 **보석:** 사파이어", "🐶 **영어 이름:** Sam", "🛹 **취미:** 스케이트보드", "🍳 **특기:** 요리"],
+                "jp": ["🩸 **血液型:** B型", "💎 **宝石:** サファイア", "🐶 **英語名:** Sam", "🛹 **趣味:** スケボー", "🍳 **特技:** 料理"],
+                "cn": ["🩸 **血型:** B型", "💎 **宝石:** 蓝宝石", "🐶 **英文名:** Sam", "🛹 **爱好:** 滑板", "🍳 **特长:** 烹饪"]
             },
-            "songs": ["WONDERLAND", "MOVE"], 
+            "songs": ["DARARI", "HELLO"],
             "covers": ["Freedom"]
         },
+        # --- 8. HARUTO ---
         {
-            "name": "Haruto", 
+            "name": "Haruto",
             "img": "haruto.jpg",
-            "birthday": "2004.04.05", 
-            "height": "183.2 cm", 
+            "history_image": "",
+            "birthday": "2004.04.05",
+            "height": "183.2 cm",
             "mbti": "INFP",
             "display_name": {"th": "วาตานาเบะ ฮารุโตะ", "en": "Watanabe Haruto", "kr": "와타나베 하루토", "jp": "渡辺温斗", "cn": "渡边温斗"},
-            "position": {"th": "เมนแร็ปเปอร์", "en": "Main Rapper", "kr": "메인 래퍼", "jp": "メインラッパー", "cn": "主Rapper"},
+            "position": {"th": "เมนแร็ปเปอร์, วิชวล", "en": "Main Rapper, Visual", "kr": "메인 래퍼, 비주얼", "jp": "メインラッパー, ビジュアル", "cn": "主Rapper, 门面"},
             "nickname": {"th": "Ruto", "en": "Ruto", "kr": "루토", "jp": "ルト", "cn": "Ruto"},
             "history": {
-                "th": "จากฟุกุโอกะ ส่วนสูง 183.2 ซม. สูงที่สุดในวง วิชวลและแร็ปเปอร์เสียงต่ำ",
-                "en": "From Fukuoka. Tallest (183.2cm). Visual & Low-tone rapper.",
-                "kr": "후쿠오카 출신. 최장신 (183.2cm). 비주얼 & 로우톤 래퍼.",
-                "jp": "福岡出身。最長身 (183.2cm)。ビジュアル担当。",
-                "cn": "来自福冈。最高 (183.2cm)。门面 & 低音Rapper。"
+                "th": "จากฟุกุโอกะ สูงที่สุดในวง (183+ ซม.) แร็ปโทนต่ำมีเสน่ห์ (Deep Voice) ครอบครัวเป็นแฟนคลับ BIGBANG",
+                "en": "From Fukuoka. Tallest member. Deep voice rapper. Family loves BIGBANG.",
+                "kr": "후쿠오카 출신. 최장신. 로우톤 래퍼. 가족이 빅뱅 팬.",
+                "jp": "福岡出身。最長身。低音ラッパー。家族がBIGBANGファン。",
+                "cn": "来自福冈。最高成员。低音Rapper。全家是BIGBANG粉丝。"
+            },
+            "biography": {
+                "th": "ฮารุโตะเข้า YG Japan เมื่อปี 2017 คุณแม่ของเขาเป็นแฟนคลับตัวยงของ BIGBANG ทำให้เขาซึมซับดนตรีมาตั้งแต่เด็ก ในรายการ Treasure Box เขาโดดเด่นด้วยเสียงแร็ปที่ต่ำและหน้าตาที่หล่อเหลา จนได้เดบิวต์เป็นสมาชิกคนแรกของยูนิต Treasure",
+                "en": "Joined YG Japan in 2017. His mom is a huge BIGBANG fan. Stood out with his deep voice/visuals in Treasure Box, debut member #1.",
+                "kr": "2017년 YG Japan 입사. 어머니가 빅뱅 팬. 보석함에서 낮은 목소리와 비주얼로 주목받아 트레저 첫 멤버로 확정.",
+                "jp": "2017年YG Japan入社。母がBIGBANGファン。宝石箱で低音ボイスとビジュアルで注目され、最初のデビューメンバーに。",
+                "cn": "2017年加入YG Japan。母亲是BIGBANG粉丝。凭低音和颜值成为首位确定出道的成员。"
             },
             "facts": {
-                "th": ["🦋 **English Name:** Travis", "💎 **Gemstone:** Opal (โอปอล)", "🩸 **Blood Type:** B", "📏 **Height:** 183.2 cm", "🇯🇵 **Origin:** Fukuoka"],
-                "en": ["🦋 **English Name:** Travis", "💎 **Gemstone:** Opal", "🩸 **Blood Type:** B", "📏 **Height:** 183.2 cm", "🇯🇵 **Origin:** Fukuoka"],
-                "kr": ["🦋 **영어 이름:** Travis", "💎 **보석:** 오팔", "🩸 **혈액형:** B형", "📏 **신장:** 183.2 cm", "🇯🇵 **출신:** 후쿠오카"],
-                "jp": ["🦋 **英語名:** Travis", "💎 **宝石:** オパール", "🩸 **血液型:** B型", "📏 **身長:** 183.2 cm", "🇯🇵 **出身:** 福岡"],
-                "cn": ["🦋 **英文名:** Travis", "💎 **宝石:** 蛋白石", "🩸 **血型:** B型", "📏 **身高:** 183.2 cm", "🇯🇵 **出身:** 福冈"]
+                "th": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Opal", "🐶 **Eng Name:** Travis", "😴 **Hobby:** Sleeping", "🎳 **Skill:** Bowling"],
+                "en": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Opal", "🐶 **Eng Name:** Travis", "😴 **Hobby:** Sleeping", "🎳 **Skill:** Bowling"],
+                "kr": ["🩸 **혈액형:** B형", "💎 **보석:** 오팔", "🐶 **영어 이름:** Travis", "😴 **취미:** 잠자기", "🎳 **특기:** 볼링"],
+                "jp": ["🩸 **血液型:** B型", "💎 **宝石:** オパール", "🐶 **英語名:** Travis", "😴 **趣味:** 寝ること", "🎳 **特技:** ボウリング"],
+                "cn": ["🩸 **血型:** B型", "💎 **宝石:** 蛋白石", "🐶 **英文名:** Travis", "😴 **爱好:** 睡觉", "🎳 **特长:** 保龄球"]
             },
-            "songs": ["G.O.A.T", "KING KONG"], 
-            "covers": ["FLASH"]
+            "songs": ["G.O.A.T", "VolKno"],
+            "covers": ["Stack It Up"]
         },
+        # --- 9. JEONGWOO ---
         {
-            "name": "Jeongwoo", 
+            "name": "Jeongwoo",
             "img": "jeongwoo.jpg",
-            "birthday": "2004.09.28", 
-            "height": "181 cm", 
+            "history_image": "",
+            "birthday": "2004.09.28",
+            "height": "181 cm",
             "mbti": "ISFP",
             "display_name": {"th": "พัค จองอู", "en": "Park Jeongwoo", "kr": "박정우", "jp": "パク・ジョンウ", "cn": "朴炡禹"},
             "position": {"th": "เมนโวคอล", "en": "Main Vocalist", "kr": "메인 보컬", "jp": "メインボーカル", "cn": "主唱"},
-            "nickname": {"th": "Vocal King", "en": "Vocal King", "kr": "보컬 킹", "jp": "ボーカルキング", "cn": "声乐天才"},
+            "nickname": {"th": "Choco Jeongwoo", "en": "Choco Jeongwoo", "kr": "초코 정우", "jp": "チョコ・ジョンウ", "cn": "巧克力炡禹"},
             "history": {
-                "th": "เด็กหนุ่มจากอิกซาน ถนัดซ้าย จบจาก SOPA",
-                "en": "From Iksan. Left-handed. SOPA Graduate.",
-                "kr": "익산 출신. 왼손잡이. 서공예 졸업.",
-                "jp": "益山出身。左利き。SOPA卒業。",
-                "cn": "来自益山。左撇子。毕业于SOPA。"
+                "th": "จากอิกซาน เพื่อนสนิทจองฮวาน (Ik-san Boys) เสียงร้องทรงพลัง (Vocal Genius) Mood Maker ของวง",
+                "en": "From Iksan. Junghwan's best friend. Powerful vocals. Mood maker.",
+                "kr": "익산 출신. 정환의 절친. 파워풀한 보컬. 분위기 메이커.",
+                "jp": "益山出身。ジョンファンの親友。パワフルなボーカル。ムードメーカー。",
+                "cn": "来自益山。庭焕好友。强力主唱。气氛制造者。"
+            },
+            "biography": {
+                "th": "จองอูสมัครออดิชั่นเข้า YG พร้อมกับจองฮวานจากสถาบันเดียวกันที่อิกซาน เขาได้รับการยกย่องว่าเป็น 'Vocal Genius' ตั้งแต่เริ่มรายการ Treasure Box แม้จะฝึกมาไม่นาน แต่พรสวรรค์ของเขาทำให้ได้รับเลือกเป็นหนึ่งในเมนโวคอลของวง",
+                "en": "Auditioned with Junghwan from Iksan. Praised as 'Vocal Genius' in Treasure Box despite short training. Selected as Main Vocal.",
+                "kr": "익산에서 정환과 함께 오디션 합격. 짧은 연습생 기간에도 '보컬 천재'로 불리며 메인 보컬로 선발됨.",
+                "jp": "益山でジョンファンと共に合格。練習期間は短かったが「ボーカル天才」と呼ばれメインボーカルに。",
+                "cn": "与庭焕一同在益山入选。练习虽短但被称为'声乐天才'，入选主唱。"
             },
             "facts": {
-                "th": ["🐺 **English Name:** Justin", "💎 **Gemstone:** Topaz (โทพาซ)", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "🎤 **Role:** Main Vocal"],
-                "en": ["🐺 **English Name:** Justin", "💎 **Gemstone:** Topaz", "🩸 **Blood Type:** O", "🤚 **Hand:** Left-handed", "🎤 **Role:** Main Vocal"],
-                "kr": ["🐺 **영어 이름:** Justin", "💎 **보석:** 토파즈", "🩸 **혈액형:** O형", "🤚 **손:** 왼손잡이", "🎤 **역할:** 메인보컬"],
-                "jp": ["🐺 **英語名:** Justin", "💎 **宝石:** トパーズ", "🩸 **血液型:** O型", "🤚 **利き手:** 左利き", "🎤 **役割:** メインボーカル"],
-                "cn": ["🐺 **英文名:** Justin", "💎 **宝石:** 托帕石", "🩸 **血型:** O型", "🤚 **惯用手:** 左手", "🎤 **担当:** 主唱"]
+                "th": ["🩸 **Blood Type:** O", "💎 **Gemstone:** Topaz", "🐶 **Eng Name:** Justin", "👂 **Charm:** Ears", "👕 **Shoulders:** Broad"],
+                "en": ["🩸 **Blood Type:** O", "💎 **Gemstone:** Topaz", "🐶 **Eng Name:** Justin", "👂 **Charm:** Ears", "👕 **Shoulders:** Broad"],
+                "kr": ["🩸 **혈액형:** O형", "💎 **보석:** 토파즈", "🐶 **영어 이름:** Justin", "👂 **매력:** 귀", "👕 **어깨:** 넓음"],
+                "jp": ["🩸 **血液型:** O型", "💎 **宝石:** トパーズ", "🐶 **英語名:** Justin", "👂 **魅力:** 耳", "👕 **肩:** 広い"],
+                "cn": ["🩸 **血型:** O型", "💎 **宝石:** 托帕石", "🐶 **英文名:** Justin", "👂 **魅力:** 耳朵", "👕 **肩膀:** 宽肩"]
             },
-            "songs": ["PARADISE", "DARARI"], 
+            "songs": ["DARARI", "MMM"],
             "covers": ["Superstar"]
         },
+        # --- 10. JUNGHWAN ---
         {
-            "name": "Junghwan", 
+            "name": "Junghwan",
             "img": "junghwan.jpg",
-            "birthday": "2005.02.18", 
-            "height": "180.3 cm", 
+            "history_image": "",
+            "birthday": "2005.02.18",
+            "height": "180.3 cm",
             "mbti": "ENFP-T",
             "display_name": {"th": "โซ จองฮวาน", "en": "So Junghwan", "kr": "소정환", "jp": "ソ・ジョンファン", "cn": "苏庭焕"},
-            "position": {"th": "น้องเล็ก, T5", "en": "Maknae, T5", "kr": "막내, T5", "jp": "末っ子, T5", "cn": "忙内, T5"},
+            "position": {"th": "โวคอล, แดนซ์, มักเน่", "en": "Vocalist, Dancer, Maknae", "kr": "보컬, 댄서, 막내", "jp": "ボーカル, ダンサー, 末っ子", "cn": "副主唱, 舞担, 忙内"},
             "nickname": {"th": "Super King Cow Baby", "en": "Super King Cow Baby", "kr": "소해금", "jp": "ジョンファン", "cn": "超级牛宝宝"},
             "history": {
-                "th": "อดีตสมาชิก K-TIGERS ฝันอยากเป็นนักเทควันโด ชอบฤดูหนาว",
-                "en": "Former K-TIGERS. Dreamed of Taekwondo. Loves Winter.",
-                "kr": "전 K-TIGERS. 태권도 선수가 꿈. 겨울을 좋아함.",
-                "jp": "元K-TIGERS。テコンドー選手が夢。冬が好き。",
-                "cn": "前K-TIGERS成员。梦想成为跆拳道运动员。喜欢冬天。"
+                "th": "น้องเล็ก (Maknae) อดีตสมาชิก K-TIGERS เก่งเทควันโดและอะโครบาติก เติบโตไวมาก",
+                "en": "Maknae. Former K-TIGERS. Skilled in Taekwondo/Acrobatics. Grows fast.",
+                "kr": "막내. 전 K-TIGERS. 태권도와 아크로바틱 능숙. 폭풍 성장.",
+                "jp": "末っ子。元K-TIGERS。テコンドーとアクロバットが得意。成長が早い。",
+                "cn": "忙内。前K-TIGERS。擅长跆拳道和杂技。暴风成长。"
+            },
+            "biography": {
+                "th": "จองฮวานเป็นสมาชิกอายุน้อยที่สุด เคยอยู่ในทีมเทควันโดระดับประเทศ K-TIGERS มาก่อน เขาเริ่มต้นใน Treasure Box ด้วยลุคเด็กน้อยแต่มีความสามารถล้นเหลือ จนได้อันดับ 1 ในการประกาศผลรอบสุดท้าย และกลายเป็นสมาชิกคนแรกของ TREASURE",
+                "en": "Youngest member, formerly in K-TIGERS taekwondo team. Ranked 1st in Treasure Box finale, becoming the very first confirmed TREASURE member.",
+                "kr": "막내이자 전 K-TIGERS 출신. 보석함 최종 1위를 차지하며 트레저의 첫 번째 멤버로 확정됨.",
+                "jp": "最年少で元K-TIGERS。宝石箱で最終1位となり、TREASUREの最初のメンバーとして確定した。",
+                "cn": "忙内，前K-TIGERS成员。在宝石盒获得最终第一名，成为TREASURE首位确定成员。"
             },
             "facts": {
-                "th": ["🐮 **English Name:** John", "💎 **Gemstone:** Turquoise (เทอร์ควอยซ์)", "🩸 **Blood Type:** B", "🥋 **Team:** K-TIGERS", "❄️ **Season:** Winter"],
-                "en": ["🐮 **English Name:** John", "💎 **Gemstone:** Turquoise", "🩸 **Blood Type:** B", "🥋 **Team:** K-TIGERS", "❄️ **Season:** Winter"],
-                "kr": ["🐮 **영어 이름:** John", "💎 **보석:** 터키석", "🩸 **혈액형:** B형", "🥋 **팀:** K-TIGERS", "❄️ **계절:** 겨울"],
-                "jp": ["🐮 **英語名:** John", "💎 **宝石:** ターコイズ", "🩸 **血液型:** B型", "🥋 **チーム:** K-TIGERS", "❄️ **季節:** 冬"],
-                "cn": ["🐮 **英文名:** John", "💎 **宝石:** 绿松石", "🩸 **血型:** B型", "🥋 **队伍:** K-TIGERS", "❄️ **季节:** 冬天"]
+                "th": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Turquoise", "🐶 **Eng Name:** John", "🍩 **Food:** Donuts", "🥋 **Skill:** Taekwondo"],
+                "en": ["🩸 **Blood Type:** B", "💎 **Gemstone:** Turquoise", "🐶 **Eng Name:** John", "🍩 **Food:** Donuts", "🥋 **Skill:** Taekwondo"],
+                "kr": ["🩸 **혈액형:** B형", "💎 **보석:** 터키석", "🐶 **영어 이름:** John", "🍩 **음식:** 도넛", "🥋 **특기:** 태권도"],
+                "jp": ["🩸 **血液型:** B型", "💎 **宝石:** ターコイズ", "🐶 **英語名:** John", "🍩 **食べ物:** ドーナツ", "🥋 **特技:** テコンドー"],
+                "cn": ["🩸 **血型:** B型", "💎 **宝石:** 绿松石", "🐶 **英文名:** John", "🍩 **食物:** 甜甜圈", "🥋 **特长:** 跆拳道"]
             },
-            "songs": ["B.O.M.B", "MOVE"], 
+            "songs": ["BOY", "I LOVE YOU"],
             "covers": ["Lie"]
         }
     ]
-
 # ============================================
 # 🎂 BIRTHDAY COUNTDOWN
 # ============================================
@@ -1878,13 +1972,15 @@ def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
         try:
             member_name = sel.get('name', 'Member')
             member_img = sel.get('img', '')
+            history_img = sel.get('history_image', '')
+            
             c1, c2 = st.columns([1.5, 2.5])
             with c1:
                 img_src = get_image_src(member_img, member_name)
                 safe_name = urllib.parse.quote(member_name)
                 st.markdown(f'<img src="{img_src}" style="width:100%; border-radius:15px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); margin-bottom: 20px;" onerror="this.src=\'https://ui-avatars.com/api/?name={safe_name}&background=32E0C4&color=fff&size=400\'">', unsafe_allow_html=True)
                 
-                # ... (ส่วนแสดงสถิติเหมือนเดิม) ...
+                # Stats Row (Birth/Height)
                 st.markdown(f"""
                 <div class="stat-row">
                     <div class="stat-item"><span class="stat-label">{t.get('birth', 'Birth')}</span><span class="stat-val">{sel.get('birthday', '-')}</span></div>
@@ -1894,6 +1990,7 @@ def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
                 <div style="text-align:center; margin-top:-10px; color:#32E0C4; font-weight:900; font-size:1.3rem;">"{sel.get('nickname', {}).get(lang, '-')}"</div>
                 """, unsafe_allow_html=True)
                 
+                # Birthday Countdown
                 days, _ = get_next_birthday(sel.get('birthday', '2000.01.01'))
                 st.markdown(f"""
                 <div style="text-align:center; margin-top:20px; padding:15px; background:var(--glass); border-radius:12px; border:1px solid var(--border);">
@@ -1903,6 +2000,7 @@ def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
                 </div>
                 """, unsafe_allow_html=True)
                 
+                # Favorite Button
                 is_favorite = member_name in st.session_state.favorites
                 fav_text = t.get('remove_favorite', '❤️ Remove') if is_favorite else t.get('add_favorite', '💖 Add')
                 if st.button(fav_text, use_container_width=True, key=f"fav_{member_name}"):
@@ -1910,7 +2008,6 @@ def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
                     st.rerun()
             
             with c2:
-                # ... (ส่วนแสดงผลด้านขวาเหมือนเดิม) ...
                 display_name = sel.get('display_name', {}).get(lang, member_name)
                 cn_name = sel.get('display_name', {}).get('cn', '')
                 cn_name_html = f'<span class="profile-cn-name">{cn_name}</span>' if cn_name else ''
@@ -1920,8 +2017,23 @@ def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
                 tab1, tab2, tab3 = st.tabs([f"📖 {t.get('tab1', 'Profile')}", f"🎵 {t.get('tab2', 'Songs')}", f"🎤 {t.get('tab3', 'Covers')}"])
                 
                 with tab1:
-                    history = sel.get('history', {}).get(lang, "No information available")
-                    st.markdown(f"""<div class="story-container"><div class="story-icon-header">✨ {t.get('story_title', 'Story')}</div><div class="story-content">{history}</div></div>""", unsafe_allow_html=True)
+                    # 1. History Image & Text (Story)
+                    history_html = ""
+                    if history_img:
+                        hist_src = get_image_src(history_img, "Story")
+                        history_html = f'<img src="{hist_src}" style="width:100%; border-radius:10px; margin-bottom:15px; border:1px solid var(--border); box-shadow:0 4px 10px rgba(0,0,0,0.2);">'
+
+                    history_text = sel.get('history', {}).get(lang, "No information available")
+                    
+                    st.markdown(f"""
+                        <div class="story-container">
+                            <div class="story-icon-header">✨ {t.get('story_title', 'Story')}</div>
+                            {history_html}
+<div class="story-content" style="margin-bottom:15px;">{history_text}</div>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                    # 2. Facts Grid (เกร็ดน่ารู้)
                     st.markdown(f"<h4 style='color:#32E0C4; margin-bottom:10px; margin-top:20px;'>{t.get('facts_title', 'Facts')}</h4>", unsafe_allow_html=True)
                     facts_html = '<div class="facts-grid">'
                     for fact_str in sel.get('facts', {}).get(lang, []):
@@ -1932,6 +2044,13 @@ def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
                             else: facts_html += f'<div class="fact-card-modern"><div class="fact-value-modern">{fact_str}</div></div>'
                         except: facts_html += f'<div class="fact-card-modern"><div class="fact-value-modern">{fact_str}</div></div>'
                     st.markdown(facts_html + '</div>', unsafe_allow_html=True)
+
+                    # 3. Biography (ย้ายมาไว้ตรงนี้ ตามที่คุณชี้ในรูป) 👇👇👇
+                    st.markdown("<br>", unsafe_allow_html=True) # เว้นบรรทัดนิดนึง
+                    biography_text = sel.get('biography', {}).get(lang, "")
+                    if biography_text:
+                        with st.expander(f"📜 {t.get('bio_title', 'Full Biography')}", expanded=False):
+                            st.markdown(f"<div style='line-height:1.8; color:var(--text-color);'>{biography_text}</div>", unsafe_allow_html=True)
                 
                 with tab2:
                     for s in sel.get('songs', []): st.markdown(f'<a href="https://www.youtube.com/results?search_query=TREASURE+{member_name}+{s}" target="_blank" class="song-link"><div class="song-card"><span class="song-title">🎵 {s}</span><span>↗</span></div></a>', unsafe_allow_html=True)
@@ -1941,11 +2060,9 @@ def show_member_modal(sel: Dict, t: Dict, lang: str, all_members: List[Dict]):
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # --- แก้ไขปุ่มปิด: ให้ล้าง query params ด้วย ---
             if st.button(f"✕ {t.get('close', 'Close')}", use_container_width=True, type="primary", key="close_modal"):
                 if 'selected_member' in st.session_state: 
                     del st.session_state.selected_member
-                # ล้างค่าใน URL เพื่อไม่ให้เด้งกลับมาอีก
                 st.query_params.clear()
                 st.rerun()
                 
