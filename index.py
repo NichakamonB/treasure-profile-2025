@@ -1242,6 +1242,59 @@ def render_birthday_section(members: List[Dict], t: Dict, lang: str):
 # 📱 SIDEBAR
 # ============================================
 def render_sidebar(members: List[Dict], t: Dict, lang: str):
+
+    current_params = st.query_params.to_dict()
+        
+    st.markdown("""
+        <style>
+            .lang-container {
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                margin-bottom: 10px;
+                flex-wrap: wrap;
+            }
+            .lang-btn {
+                text-decoration: none;
+                font-size: 1.8rem;
+                filter: grayscale(100%);
+                opacity: 0.6;
+                transition: all 0.3s ease;
+                line-height: 1;
+                cursor: pointer;
+            }
+            .lang-btn:hover {
+                transform: scale(1.2);
+                filter: grayscale(0%);
+                opacity: 1;
+            }
+            .lang-btn.active {
+                filter: grayscale(0%);
+                opacity: 1;
+                transform: scale(1.1);
+                text-shadow: 0 0 15px rgba(50, 224, 196, 0.6);
+            }
+            @media (max-width: 768px) {
+                .lang-container {
+                    justify-content: center;
+                }
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+    lang_options = {'th': '🇹🇭', 'en': '🇬🇧', 'kr': '🇰🇷', 'jp': '🇯🇵', 'cn': '🇨🇳'}
+        
+    html_content = '<div class="lang-container">'
+    for code, flag in lang_options.items():
+            params = current_params.copy()
+            params['lang'] = code
+            query_string = urllib.parse.urlencode(params)
+            is_active = "active" if lang == code else ""
+            html_content += f'<a href="?{query_string}" target="_self" class="lang-btn {is_active}">{flag}</a>'
+    html_content += '</div>'
+        
+    st.markdown(html_content, unsafe_allow_html=True)
+    
     with st.sidebar:
         total_songs = sum(len(m.get('songs', [])) for m in members)
         st.markdown(f"<h2 style='color:#32E0C4; text-align:center;'>{t.get('rec_title', '✨ Recommended')}</h2>", unsafe_allow_html=True)
