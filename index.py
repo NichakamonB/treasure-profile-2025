@@ -5,6 +5,8 @@ import urllib.parse
 import random
 import json
 import uuid
+import gspread  # <--- เพิ่มตัวนี้
+from google.oauth2.service_account import Credentials
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -75,53 +77,91 @@ class UserPreferences:
         data['theme'] = theme
         return self.save_all(data)
     
-    # ============================================
-# 💬 COMMENT SYSTEM
+# ============================================
+# 💬 COMMENT SYSTEM (GSPREAD VERSION - FIX)
 # ============================================
 class CommentSystem:
-    def __init__(self, file_path="fan_comments.json"):
-        self.file_path = file_path
+    def __init__(self):
+        self.sheet = None
+        try:
+            # 1. เชื่อมต่อโดยใช้ gspread (ไม่ง้อ st-gsheets)
+            # ดึงข้อมูลจาก secrets.toml
+            if "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
+                secrets = st.secrets["connections"]["gsheets"]
+                creds_info = secrets["service_account_info"]
+                sheet_url = secrets["spreadsheet"]
+                
+                # กำหนดสิทธิ์
+                scopes = [
+                    "https://www.googleapis.com/auth/spreadsheets",
+                    "https://www.googleapis.com/auth/drive"
+                ]
+                
+                # สร้าง Credential
+                creds = Credentials.from_service_account_info(creds_info, scopes=scopes)
+                client = gspread.authorize(creds)
+                
+                # เปิด Google Sheet
+                self.sheet = client.open_by_url(sheet_url).sheet1
+            else:
+                # กรณีรันครั้งแรกแล้วยังไม่ได้สร้าง secrets.toml
+                pass 
+                
+        except Exception as e:
+            st.error(f"Database Connection Error: {str(e)}")
 
     def load_comments(self) -> List[Dict]:
-        if not os.path.exists(self.file_path):
-            return []
+        if not self.sheet: return []
         try:
-            with open(self.file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+            # ดึงข้อมูลทั้งหมดมาเป็น List of Dicts โดยตรง
+            return self.sheet.get_all_records()
         except:
             return []
 
-    def save_all_comments(self, comments):
-        with open(self.file_path, "w", encoding="utf-8") as f:
-            json.dump(comments, f, ensure_ascii=False, indent=2)
-
-    def add_comment(self, name, member, message, owner_id): 
-        comments = self.load_comments()
-        new_comment = {
-            "id": str(uuid.uuid4()),
-            "owner_id": owner_id,  # 👈 บันทึกว่าใครเป็นคนโพสต์
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "name": name,
-            "member": member,
-            "message": message,
-            "avatar": random.choice(["💎", "💙", "🐯", "🐨", "🐰", "🦋", "🐺", "🐮", "🦔", "🤖"])
-        }
-        comments.insert(0, new_comment)
-        self.save_all_comments(comments[:50]) # เก็บ 50 อันล่าสุด
+    def add_comment(self, name, member, message, owner_id):
+        if not self.sheet: 
+            st.error("Cannot connect to Database")
+            return
+        
+        try:
+            # เตรียมข้อมูล (เรียงตามคอลัมน์ใน Google Sheet)
+            # 1:id, 2:owner_id, 3:timestamp, 4:name, 5:member, 6:message, 7:avatar
+            new_row = [
+                str(uuid.uuid4()), 
+                str(owner_id),     
+                datetime.now().strftime("%Y-%m-%d %H:%M"), 
+                name,              
+                member,            
+                message,           
+                random.choice(["💎", "💙", "🐯", "🐨", "🐰", "🦋", "🐺", "🐮", "🦔", "🤖"]) 
+            ]
+            
+            # แทรกบรรทัดใหม่ที่แถว 2 (ต่อจากหัวตาราง)
+            self.sheet.insert_row(new_row, 2)
+        except Exception as e:
+            st.error(f"Save Error: {str(e)}")
 
     def delete_comment(self, comment_id):
-        comments = self.load_comments()
-        comments = [c for c in comments if c.get('id') != comment_id]
-        self.save_all_comments(comments)
+        if not self.sheet: return
+        try:
+            # ค้นหา Cell ที่มี ID นี้
+            cell = self.sheet.find(comment_id)
+            if cell:
+                self.sheet.delete_rows(cell.row)
+        except:
+            pass
 
     def edit_comment(self, comment_id, new_message):
-        comments = self.load_comments()
-        for c in comments:
-            if c.get('id') == comment_id:
-                c['message'] = new_message
-                c['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M") + " (Edited)"
-                break
-        self.save_all_comments(comments)
+        if not self.sheet: return
+        try:
+            # ค้นหา Cell ที่มี ID นี้
+            cell = self.sheet.find(comment_id)
+            if cell:
+                # แก้ไข Column ที่ 6 (Message) และ 3 (Timestamp)
+                self.sheet.update_cell(cell.row, 6, new_message) 
+                self.sheet.update_cell(cell.row, 3, datetime.now().strftime("%Y-%m-%d %H:%M") + " (Edited)")
+        except:
+            pass
 
         
 
