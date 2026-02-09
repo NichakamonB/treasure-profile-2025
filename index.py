@@ -1384,7 +1384,7 @@ def get_members_data() -> List[Dict]:
                 "cn": ["🩸 **血型:** B型", "💎 **宝石:** 紫水晶", "🐶 **英文名:** Jun Park", "💪 **特长:** 普拉提", "📷 **爱好:** 摄影"]
             },
             "songs": ["The Way To", "HOLD IT IN"],
-            "covers": ["Song Request"]
+            "covers": ["UGLY"]
         },
         # --- 3. YOSHI ---
         {
@@ -1489,7 +1489,7 @@ def get_members_data() -> List[Dict]:
                 "cn": ["🩸 **血型:** O型", "💎 **宝石:** 珍珠", "🐶 **英文名:** Kevin", "🤚 **惯用手:** 左手", "💍 **魅力:** Ring Ring"]
             },
             "songs": ["HELLO", "CLAP!"],
-            "covers": ["Ring Ring"]
+            "covers": ["DON'T FLIRT"]
         },
         # --- 6. ASAHI ---
         {
@@ -1559,7 +1559,7 @@ def get_members_data() -> List[Dict]:
                 "cn": ["🩸 **血型:** B型", "💎 **宝石:** 蓝宝石", "🐶 **英文名:** Sam", "🛹 **爱好:** 滑板", "🍳 **特长:** 烹饪"]
             },
             "songs": ["DARARI", "HELLO"],
-            "covers": ["Freedom"]
+            "covers": ["Babushka Boi - A$AP Rocky"]
         },
         # --- 8. HARUTO ---
         {
@@ -1629,7 +1629,7 @@ def get_members_data() -> List[Dict]:
                 "cn": ["🩸 **血型:** O型", "💎 **宝石:** 托帕石", "🐶 **英文名:** Justin", "👂 **魅力:** 耳朵", "👕 **肩膀:** 宽肩"]
             },
             "songs": ["DARARI", "MMM"],
-            "covers": ["Superstar"]
+            "covers": ["Superstar", "Life Is Worth Living", "Weight In Gold ", "Nothing's Gonna Change My Love For You"]
         },
         # --- 10. JUNGHWAN ---
         {
@@ -1664,7 +1664,7 @@ def get_members_data() -> List[Dict]:
                 "cn": ["🩸 **血型:** B型", "💎 **宝石:** 绿松石", "🐶 **英文名:** John", "🍩 **食物:** 甜甜圈", "🥋 **特长:** 跆拳道"]
             },
             "songs": ["BOY", "I LOVE YOU"],
-            "covers": ["Lie"]
+            "covers": ["Lie", "소정환의 졸업"]
         }
     ]
 # ============================================
