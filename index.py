@@ -96,80 +96,77 @@ def render_discography(t: Dict, lang: str):
             "title": "LOVE PULSE",
             "type": "3rd MINI ALBUM",
             "tracks": ["EVERYTHING", "PARADISE (Title)", "NOW FOREVER", "BETTER THAN ME"],
-            "cover": "https://tse2.mm.bing.net/th/id/OIP._4MHl_q5-oIsoYKvZJFbVgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", # ใช้รูปโปรไฟล์วงแทนไปก่อน (เพราะเป็นอัลบั้มอนาคต)
-            "spotify": components.iframe"https://open.spotify.com/album/2vdCi7WRcjd2hRzwd4KeQ3?si=DSH1H1d0Qkqvi3U63aBBeA" 
+            "cover": "https://tse2.mm.bing.net/th/id/OIP._4MHl_q5-oIsoYKvZJFbVgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" # ใช้รูปโปรไฟล์วงแทนไปก่อน (เพราะเป็นอัลบั้มอนาคต)
         },
         {
             "year": "2025",
             "title": "PLEASURE",
             "type": "SPECIAL MINI ALBUM",
             "tracks": ["YELLOW (Title)", "SARURU", "WHATEVER, WHENEVER", "LAST NIGHT"],
-            "cover": "https://i.pinimg.com/1200x/ab/0a/72/ab0a72ba71f27d070f6877ab97f4e3a9.jpg", # ใช้รูปวงล่าสุดแทนปกจริง
-            "spotify": "4Ek59vEmWeKZTWgFbWNZlL?si=XEENvAPjT0Ck7pi897E2lA" 
+            "cover": "https://i.pinimg.com/1200x/ab/0a/72/ab0a72ba71f27d070f6877ab97f4e3a9.jpg" # ใช้รูปวงล่าสุดแทนปกจริง
         },
         {
             "year": "2024",
             "title": "KING KONG",
             "type": "DIGITAL SINGLE",
             "tracks": ["KING KONG"],
-            "cover": "https://i.pinimg.com/736x/7b/c3/a5/7bc3a5979233bd112a16966471312b6e.jpg", 
-            "spotify": "43R91w6pa9rmQVPVjcPFTT?si=TPhnOSsgTeSPN4ENITNc4A" 
+            "cover": "https://i.pinimg.com/736x/7b/c3/a5/7bc3a5979233bd112a16966471312b6e.jpg"
         },
         {
             "year": "2023",
             "title": "REBOOT",
             "type": "2nd FULL ALBUM",
             "tracks": ["BONA BONA", "I WANT YOUR LOVE", "RUN", "MOVE (T5)", "G.O.A.T", "STUPID", "THE WAY TO", "WONDERLAND", "B.O.M.B", "LOVESICK"],
-            "cover": "https://upload.wikimedia.org/wikipedia/en/d/d8/Treasure_-_Reboot_Digital_Album_Cover.jpg",
-            "spotify": "2Dk2Cj8BBnJngSoOfWjyL9?si=-XyxIkLbRrO1e-Jfz5PycA" 
+            "cover": "https://upload.wikimedia.org/wikipedia/en/d/d8/Treasure_-_Reboot_Digital_Album_Cover.jpg"
+
         },
         {
             "year": "2022",
             "title": "THE SECOND STEP : CHAPTER TWO",
             "type": "2nd MINI ALBUM",
             "tracks": ["HELLO", "VolKno", "CLAP!", "THANK YOU", "HOLD IT IN"],
-            "cover": "https://i.pinimg.com/1200x/45/ee/de/45eede8134fa8f7c036477f85f4a7b39.jpg",
-            "spotify": "4l5YvRcmno5RMKZCZp1j0g?si=fTCiNXmUT3alLjWxHbeVdw" 
+            "cover": "https://i.pinimg.com/1200x/45/ee/de/45eede8134fa8f7c036477f85f4a7b39.jpg"
+            
         },
         {
             "year": "2022",
             "title": "THE SECOND STEP : CHAPTER ONE",
             "type": "1st MINI ALBUM",
             "tracks": ["JIKJIN", "U", "DARARI", "IT'S OKAY"],
-            "cover": "https://upload.wikimedia.org/wikipedia/en/8/8f/The_Second_Step%2C_Chapter_One_cover.jpeg",
-            "spotify": "17l09k7ZDb4GYwmsIVGcRZ?si=PwSH9BzeRPK9dMWp2myjtQ" 
+            "cover": "https://upload.wikimedia.org/wikipedia/en/8/8f/The_Second_Step%2C_Chapter_One_cover.jpeg"
+        
         },
         {
             "year": "2021",
             "title": "THE FIRST STEP : TREASURE EFFECT",
             "type": "1st FULL ALBUM",
             "tracks": ["MY TREASURE", "BE WITH ME", "SLOWMOTION"],
-            "cover": "https://upload.wikimedia.org/wikipedia/en/d/d2/The_First_Step_Treasure_Effect.jpg",
-            "spotify": "5tQDFmW8QrZdTsICpLQBTL?si=m0Vo-m1GRgWGpnLp0613pw"
+            "cover": "https://upload.wikimedia.org/wikipedia/en/d/d2/The_First_Step_Treasure_Effect.jpg"
+      
     },
     {
             "year": "2020",
             "title": "THE FIRST STEP : CHAPTER THREE",
             "type": "3rd SINGLE ALBUM",
             "tracks": ["MMM", "ORANGE"],
-            "cover": "https://upload.wikimedia.org/wikipedia/en/2/2d/Treasure_-_The_First_Step_Chapter_Three.jpg",
-            "spotify": "6fjGlzWNub2dRFWPWrOCAr?si=ze27EJfdRLi0UFqY_4PSDw"
+            "cover": "https://upload.wikimedia.org/wikipedia/en/2/2d/Treasure_-_The_First_Step_Chapter_Three.jpg"
+        
     },
     {
             "year": "2020",
             "title": "THE FIRST STEP : CHAPTER TWO",
             "type": "2nd SINGLE ALBUM",
             "tracks": ["I LOVE YOU", "B.L.T (BLING LIKE THIS)"],
-            "cover": "https://upload.wikimedia.org/wikipedia/en/9/99/Treasure%2C_The_First_Step_Chapter_Two.png",
-            "spotify": "0j5W5CQYZk94YFydK3HO9K?si=c7ZSK5apRAaj9Nr8S2pJPw"
+            "cover": "https://upload.wikimedia.org/wikipedia/en/9/99/Treasure%2C_The_First_Step_Chapter_Two.png"
+       
     },
     {
             "year": "2020",
             "title": "THE FIRST STEP : CHAPTER ONE",
             "type": "DEBUT SINGLE ALBUM",
             "tracks": ["BOY", "COME TO ME"],
-            "cover": "https://upload.wikimedia.org/wikipedia/en/f/fd/Treasure%2C_The_First_Step_Chapter_One.png",
-            "spotify": "1eRPLg2vSNaNUfPfSjdi0Z?si=cvFfKKG5TxyrTZf12wjXjw"
+            "cover": "https://upload.wikimedia.org/wikipedia/en/f/fd/Treasure%2C_The_First_Step_Chapter_One.png"
+           
         }
     ]
 
@@ -2318,4 +2315,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
