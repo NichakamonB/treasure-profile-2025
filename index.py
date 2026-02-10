@@ -97,7 +97,7 @@ def render_discography(t: Dict, lang: str):
             "type": "3rd MINI ALBUM",
             "tracks": ["EVERYTHING", "PARADISE (Title)", "NOW FOREVER", "BETTER THAN ME"],
             "cover": "https://tse2.mm.bing.net/th/id/OIP._4MHl_q5-oIsoYKvZJFbVgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", # ใช้รูปโปรไฟล์วงแทนไปก่อน (เพราะเป็นอัลบั้มอนาคต)
-            "spotify": "2vdCi7WRcjd2hRzwd4KeQ3?si=DSH1H1d0Qkqvi3U63aBBeA" 
+            "spotify": "https://open.spotify.com/album/2vdCi7WRcjd2hRzwd4KeQ3?si=DSH1H1d0Qkqvi3U63aBBeA" 
         },
         {
             "year": "2025",
@@ -2316,4 +2316,5 @@ def main():
             st.rerun()
 
 if __name__ == "__main__":
+
     main()
