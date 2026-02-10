@@ -6,6 +6,7 @@ import random
 import json
 import uuid
 import gspread  # <--- เพิ่มตัวนี้
+import streamlit.components.v1 as components
 from google.oauth2.service_account import Credentials
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
@@ -76,6 +77,124 @@ class UserPreferences:
         data = self.load_all()
         data['theme'] = theme
         return self.save_all(data)
+    
+# ============================================
+# 💿 DISCOGRAPHY PAGE
+# ============================================
+def render_discography(t: Dict, lang: str):
+    st.markdown(f"""
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: var(--primary); text-shadow: 0 0 20px rgba(50,224,196,0.5);">💿 DISCOGRAPHY</h1>
+        <p style="color: var(--secondary-text);">TREASURE MUSIC COLLECTION 2020 - 2026</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ข้อมูลอัลบั้ม (เรียงจากใหม่ -> เก่า)
+    albums = [
+        {
+            "year": "2026",
+            "title": "LOVE PULSE",
+            "type": "3rd MINI ALBUM",
+            "tracks": ["EVERYTHING", "PARADISE (Title)", "NOW FOREVER", "BETTER THAN ME"],
+            "cover": "https://tse2.mm.bing.net/th/id/OIP._4MHl_q5-oIsoYKvZJFbVgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", # ใช้รูปโปรไฟล์วงแทนไปก่อน (เพราะเป็นอัลบั้มอนาคต)
+            "spotify": "2vdCi7WRcjd2hRzwd4KeQ3?si=DSH1H1d0Qkqvi3U63aBBeA" 
+        },
+        {
+            "year": "2025",
+            "title": "PLEASURE",
+            "type": "SPECIAL MINI ALBUM",
+            "tracks": ["YELLOW (Title)", "SARURU", "WHATEVER, WHENEVER", "LAST NIGHT"],
+            "cover": "https://i.pinimg.com/1200x/ab/0a/72/ab0a72ba71f27d070f6877ab97f4e3a9.jpg", # ใช้รูปวงล่าสุดแทนปกจริง
+            "spotify": "4Ek59vEmWeKZTWgFbWNZlL?si=XEENvAPjT0Ck7pi897E2lA" 
+        },
+        {
+            "year": "2024",
+            "title": "KING KONG",
+            "type": "DIGITAL SINGLE",
+            "tracks": ["KING KONG"],
+            "cover": "https://i.pinimg.com/736x/7b/c3/a5/7bc3a5979233bd112a16966471312b6e.jpg", 
+            "spotify": "43R91w6pa9rmQVPVjcPFTT?si=TPhnOSsgTeSPN4ENITNc4A" 
+        },
+        {
+            "year": "2023",
+            "title": "REBOOT",
+            "type": "2nd FULL ALBUM",
+            "tracks": ["BONA BONA", "I WANT YOUR LOVE", "RUN", "MOVE (T5)", "G.O.A.T", "STUPID", "THE WAY TO", "WONDERLAND", "B.O.M.B", "LOVESICK"],
+            "cover": "https://upload.wikimedia.org/wikipedia/en/d/d8/Treasure_-_Reboot_Digital_Album_Cover.jpg",
+            "spotify": "2Dk2Cj8BBnJngSoOfWjyL9?si=-XyxIkLbRrO1e-Jfz5PycA" 
+        },
+        {
+            "year": "2022",
+            "title": "THE SECOND STEP : CHAPTER TWO",
+            "type": "2nd MINI ALBUM",
+            "tracks": ["HELLO", "VolKno", "CLAP!", "THANK YOU", "HOLD IT IN"],
+            "cover": "https://i.pinimg.com/1200x/45/ee/de/45eede8134fa8f7c036477f85f4a7b39.jpg",
+            "spotify": "4l5YvRcmno5RMKZCZp1j0g?si=fTCiNXmUT3alLjWxHbeVdw" 
+        },
+        {
+            "year": "2022",
+            "title": "THE SECOND STEP : CHAPTER ONE",
+            "type": "1st MINI ALBUM",
+            "tracks": ["JIKJIN", "U", "DARARI", "IT'S OKAY"],
+            "cover": "https://upload.wikimedia.org/wikipedia/en/8/8f/The_Second_Step%2C_Chapter_One_cover.jpeg",
+            "spotify": "17l09k7ZDb4GYwmsIVGcRZ?si=PwSH9BzeRPK9dMWp2myjtQ" 
+        },
+        {
+            "year": "2021",
+            "title": "THE FIRST STEP : TREASURE EFFECT",
+            "type": "1st FULL ALBUM",
+            "tracks": ["MY TREASURE", "BE WITH ME", "SLOWMOTION"],
+            "cover": "https://upload.wikimedia.org/wikipedia/en/d/d2/The_First_Step_Treasure_Effect.jpg",
+            "spotify": "5tQDFmW8QrZdTsICpLQBTL?si=m0Vo-m1GRgWGpnLp0613pw"
+    },
+    {
+            "year": "2020",
+            "title": "THE FIRST STEP : CHAPTER THREE",
+            "type": "3rd SINGLE ALBUM",
+            "tracks": ["MMM", "ORANGE"],
+            "cover": "https://upload.wikimedia.org/wikipedia/en/2/2d/Treasure_-_The_First_Step_Chapter_Three.jpg",
+            "spotify": "6fjGlzWNub2dRFWPWrOCAr?si=ze27EJfdRLi0UFqY_4PSDw"
+    },
+    {
+            "year": "2020",
+            "title": "THE FIRST STEP : CHAPTER TWO",
+            "type": "2nd SINGLE ALBUM",
+            "tracks": ["I LOVE YOU", "B.L.T (BLING LIKE THIS)"],
+            "cover": "https://upload.wikimedia.org/wikipedia/en/9/99/Treasure%2C_The_First_Step_Chapter_Two.png",
+            "spotify": "0j5W5CQYZk94YFydK3HO9K?si=c7ZSK5apRAaj9Nr8S2pJPw"
+    },
+    {
+            "year": "2020",
+            "title": "THE FIRST STEP : CHAPTER ONE",
+            "type": "DEBUT SINGLE ALBUM",
+            "tracks": ["BOY", "COME TO ME"],
+            "cover": "https://upload.wikimedia.org/wikipedia/en/f/fd/Treasure%2C_The_First_Step_Chapter_One.png",
+            "spotify": "1eRPLg2vSNaNUfPfSjdi0Z?si=cvFfKKG5TxyrTZf12wjXjw"
+        }
+    ]
+
+    for album in albums:
+        with st.expander(f"{album['year']} | {album['title']}", expanded=(album['year'] == "2026")):
+            c1, c2 = st.columns([1, 2])
+            with c1:
+                st.image(album['cover'], use_container_width=True)
+                # ปุ่มฟังเพลง (ลิงก์ไป Spotify)
+                if st.button(f"🎧 Listen on Spotify", key=f"sp_{album['title']}"):
+                    st.markdown(f'<meta http-equiv="refresh" content="0;url=https://open.spotify.com/album/{album["spotify"]}">', unsafe_allow_html=True)
+            
+            with c2:
+                st.markdown(f"<h3 style='color:var(--primary); margin:0;'>{album['title']}</h3>", unsafe_allow_html=True)
+                st.caption(f"{album['type']} • Released: {album['year']}")
+                st.markdown("---")
+                
+                # รายชื่อเพลงแบบสวยๆ
+                for i, track in enumerate(album['tracks']):
+                    st.markdown(f"""
+                    <div style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); display:flex; align-items:center;">
+                        <span style="color:var(--primary); width:30px; font-weight:bold;">{i+1}</span>
+                        <span style="color:var(--text-color);">{track}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
     
 # ============================================
 # 💬 COMMENT SYSTEM (GSPREAD VERSION - FIX)
@@ -1803,6 +1922,13 @@ def render_sidebar(members: List[Dict], t: Dict, lang: str):
         if st.button(f"{t.get('menu_about', '🏢 About Group')}", use_container_width=True, type="primary" if st.session_state.page == 'about' else "secondary"):
             st.session_state.page = 'about'
             st.rerun()
+
+            
+        # --- เพิ่มปุ่มนี้ครับ ---
+        if st.button("💿 Discography", use_container_width=True, type="primary" if st.session_state.page == 'discography' else "secondary"):
+            st.session_state.page = 'discography'
+            st.rerun()
+        # ---------------------
             
         if st.button(f"{t.get('menu_cheer', '💬 Fan Zone')}", use_container_width=True, type="primary" if st.session_state.page == 'cheer' else "secondary"):
             st.session_state.page = 'cheer'
@@ -1832,6 +1958,11 @@ def render_sidebar(members: List[Dict], t: Dict, lang: str):
         """, unsafe_allow_html=True)
 
         st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
+
+        st.markdown("---")
+        st.markdown("### 🎧 Listening To TREASURE")
+        # Playlist: This Is TREASURE
+        components.iframe("https://open.spotify.com/embed/artist/3KonOYiLsU53m4yT7gNotP?utm_source=generator&theme=0", height=380, scrolling=False)
         
         # ตรวจสอบสถานะ Admin
         is_admin_active = st.session_state.get('is_admin_active', False)
@@ -2160,6 +2291,11 @@ def main():
         elif st.session_state.page == 'about':
             render_group_info(t, lang)
         
+        # --- เพิ่มส่วนนี้ ---
+        elif st.session_state.page == 'discography':
+            render_discography(t, lang)
+        # -----------------
+        
         elif st.session_state.page == 'cheer':
             render_cheer_board(t, members)
 
@@ -2180,5 +2316,4 @@ def main():
             st.rerun()
 
 if __name__ == "__main__":
-
     main()
