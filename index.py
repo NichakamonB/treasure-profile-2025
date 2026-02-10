@@ -176,8 +176,8 @@ def render_discography(t: Dict, lang: str):
             with c1:
                 st.image(album['cover'], use_container_width=True)
                 # ปุ่มฟังเพลง (ลิงก์ไป Spotify)
-                if st.button(f"🎧 Listen on Spotify", key=f"sp_{album['title']}"):
-                    st.markdown(f'<meta http-equiv="refresh" content="0;url=https://open.spotify.com/album/{album["spotify"]}">', unsafe_allow_html=True)
+                ##if st.button(f"🎧 Listen on Spotify", key=f"sp_{album['title']}"):
+                    ##st.markdown(f'<meta http-equiv="refresh" content="0;url=https://open.spotify.com/album/{album["spotify"]}">', unsafe_allow_html=True)
             
             with c2:
                 st.markdown(f"<h3 style='color:var(--primary); margin:0;'>{album['title']}</h3>", unsafe_allow_html=True)
@@ -2315,5 +2315,6 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
