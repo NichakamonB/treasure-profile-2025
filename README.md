@@ -2,7 +2,7 @@
 
 A fan-community platform built with **Python & Streamlit**, featuring member profiles, Spotify-integrated discography, birthday alerts, favorites, and a community cheer board — all backed by real-time data from Google Sheets.
 
-🔗 **Live demo:** [treasure-profile-2025.vercel.app](https://treasure-profile-2025.vercel.app)
+🔗 **Live demo:** [treasure-profile-fc.streamlit.app](https://treasure-profile-fc.streamlit.app/)
 
 ![Group Photo](group.jpg)
 
@@ -27,7 +27,7 @@ A fan-community platform built with **Python & Streamlit**, featuring member pro
 | Framework      | Python + Streamlit |
 | Data Source    | Google Sheets API (gspread) |
 | Styling        | Custom CSS (dark mode, animations) |
-| Deployment     | Vercel |
+| Deployment     | Streamlit Community Cloud |
 
 ---
 
